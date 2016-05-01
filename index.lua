@@ -769,7 +769,11 @@ main = (function()
 	end
 
 	function mod.chooseEbook()
-		return '/book.epub'
+		local bookfile = '/book.epub'
+		if not System.doesFileExist(bookfile) then
+			error(('Cannot find %q'):format(bookfile))
+		end
+		return bookfile
 	end
 
 	function mod.readEbook(bookfile)
