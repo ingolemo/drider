@@ -667,6 +667,9 @@ local epub = (function()
 			System.deleteFile(tmpFile)
 			if filename == nil then
 				error('Cannot extract nil filename')
+			elseif filename:sub(1, 1) == '/' then
+				-- don't start the zip file query with /
+				filename = filename:sub(2)
 			end
 			System.extractFromZIP(self.file, filename, tmpFile)
 			if not System.doesFileExist(tmpFile) then
