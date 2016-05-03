@@ -498,6 +498,20 @@ local render = (function()
 		end
 	end
 
+	local function insertText(idata, content, font, fontSize)
+		-- approximate the width, so we can quick-draw text
+		local avgCharW = fontSize * 0.33
+		local probableTextW = math.floor(#content * avgCharW)
+		local w = math.min(300, probableTextW)
+
+		table.insert(idata, {
+			type='text',
+			height=fontSize, width=w,
+			font=font, fontSize=fontSize,
+			content=content,
+		})
+	end
+
 	function mod.compileHTML(data, imageLoader, pagenum, bookmarked)
 		-- takes a flat html table structure as produced by the html
 		-- module and compiles it down to a format more useful for
@@ -512,30 +526,17 @@ local render = (function()
 
 		table.insert(idata, {type='space', height=margin})
 
-		local function insertText(content, font, fontSize)
-			-- approximate the width, so we can quick-draw text
-			local avgCharW = fontSize * 0.33
-			local probableTextW = math.floor(#content * avgCharW)
-			local w = math.min(300, probableTextW)
-
-			table.insert(idata, {
-				type='text',
-				height=fontSize, width=w,
-				font=font, fontSize=fontSize,
-				content=content,
-			})
-		end
 
 		for _, item in ipairs(data) do
 			if item.type == 'h1' then
-				insertText(item.content, titleFont, h1Size)
+				insertText(idata, item.content, titleFont, h1Size)
 			elseif item.type == 'h2' then
-				insertText(item.content, titleFont, h2Size)
+				insertText(idata, item.content, titleFont, h2Size)
 			elseif item.type == 'h3' then
-				insertText(item.content, titleFont, h3Size)
+				insertText(idata, item.content, titleFont, h3Size)
 			elseif item.type == 'p' then
 				for _, line in ipairs(item.content:wrap(50)) do
-					insertText(line, regularFont, bookSize)
+					insertText(idata, line, regularFont, bookSize)
 				end
 			elseif item.type == 'img' then
 				local image = mod.loadImage(item.src, imageLoader)
@@ -553,7 +554,7 @@ local render = (function()
 				})
 			else
 				local msg = 'WARNING: Unknown tag %q.'
-				insertText(msg:format(item.type), italicFont, bookSize)
+				insertText(idata, msg:format(item.type), italicFont, bookSize)
 			end
 			table.insert(idata, {type='space', height=padding})
 		end
