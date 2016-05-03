@@ -166,7 +166,9 @@ local html = (function()
 		local function writeItem()
 			local stripped = unescapeEntities(text:strip())
 			if stripped ~= '' then
-				table.insert(result, {type=type, content=stripped})
+				if type ~= 'ignore' then
+					table.insert(result, {type=type, content=stripped})
+				end
 				type = 'p'
 				text = ''
 			end
@@ -175,6 +177,7 @@ local html = (function()
 		-- the kinds of html _text content_ tags we support and what
 		-- they map to
 		local tagMap = {
+			title='ignore', style='ignore',
 			h1='h1', h2='h2', h3='h3',
 			p='p',
 		}
