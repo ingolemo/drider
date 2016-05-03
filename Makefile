@@ -7,7 +7,7 @@ dist: build/drider.tar.gz build/drider.zip
 cia: build/drider.cia
 
 3dsx: index.lua build/drider.smdh bookmark.png
-	mkdir -p build/3ds/drider
+	@mkdir -p build/3ds/drider
 	cp -f index.lua build/3ds/drider/
 	cp -f bookmark.png build/3ds/drider/
 	cp -f build/drider.smdh build/3ds/drider/
@@ -37,11 +37,13 @@ build/drider.zip: build/drider.cia 3dsx
 	cd build && zip -r drider.zip drider.cia 3ds
 
 build/drider.bnr: banner.png jingle.wav
+	@mkdir -p $(@D)
 	bannertool makebanner --output $@ \
 		--image banner.png \
 		--audio jingle.wav
 
 build/drider.smdh: icon.png
+	@mkdir -p $(@D)
 	bannertool makesmdh --output $@ \
 		--shorttitle "Drider" \
 		--longtitle "Drider epub reader" \
@@ -49,7 +51,7 @@ build/drider.smdh: icon.png
 		--icon icon.png
 
 build/romfs.bin: index.lua
-	mkdir -p build/romfs
+	@mkdir -p build/romfs
 	cp -f index.lua build/romfs/
 	3dstool --file $@ \
 		--create --type romfs \
