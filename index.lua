@@ -807,7 +807,7 @@ end)()
 
 --MODULE main
 main = (function()
-	mod = {}
+	local mod = {}
 
 	function mod.run()
 		local bookfile = mod.chooseEbook()
