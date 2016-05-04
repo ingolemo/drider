@@ -19,14 +19,16 @@ Drider has a few limitations:
   mojibake is common.
 * Text rendering on the 3ds is not very good so you will see plenty of
   bad kerning.
-* Right now you need to put the ebook you want to read in the file
-  `book.epub` at the base of your sd card. File selection coming Soon™.
 
 Despite these issues, Drider can actually be used to read things! It
 works best on text-heavy, low-formatting books such as novels.
 
+Put your ebooks in a folder called `books` at the root of your sd card.
+
 ## Controls
 
+* Up and Down on the d-dpad to choose a book to read and the A button to
+  select it.
 * Up and Down on the d-dpad or circle-pad to scroll. You can also drag
   the touch screen.
 * Left and Right on the d-pad to switch pages.

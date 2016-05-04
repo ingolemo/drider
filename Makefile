@@ -8,6 +8,7 @@ cia: build/drider.cia
 
 3dsx: index.lua build/drider.smdh bookmark.png
 	@mkdir -p build/3ds/drider
+	@mkdir -p build/books
 	cp -f index.lua build/3ds/drider/
 	cp -f bookmark.png build/3ds/drider/
 	cp -f build/drider.smdh build/3ds/drider/
