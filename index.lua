@@ -815,11 +815,51 @@ main = (function()
 	end
 
 	function mod.chooseEbook()
-		local bookfile = '/book.epub'
-		if not System.doesFileExist(bookfile) then
-			error(('Cannot find %q'):format(bookfile))
+		local con = Console.new(BOTTOM_SCREEN)
+		local cont = control.new()
+		local index = 1
+		local books = {}
+		for _, file in ipairs(System.listDirectory('/books')) do
+			if file.name:sub(-5) == '.epub' then
+				table.insert(books, file.name)
+			end
 		end
-		return bookfile
+
+		while true do
+			cont:input()
+
+			if System.checkStatus() == APP_EXITING then System.exit() end
+			if cont:check(KEY_START) then System.exit() end
+			if cont:check(KEY_HOME) then System.showHomeMenu() end
+
+			if cont:down(KEY_A) then
+				break
+			end
+
+			if cont:down(KEY_DUP) then
+				index = math.max(1, index - 1)
+			elseif cont:down(KEY_DDOWN) then
+				index = math.min(index + 1, #books)
+			end
+
+			Screen.waitVblankStart()
+			Screen.refresh()
+			Screen.clear(BOTTOM_SCREEN)
+			Console.clear(con)
+			for i, book in ipairs(books) do
+				if i == index then
+					-- set color to red
+					-- book = '\x1b[31m'..book..'\x1b[0m'
+					book = '> ' .. book
+				end
+				Console.append(con, book..'\n')
+			end
+			Console.show(con)
+			Screen.flip()
+		end
+
+		Console.destroy(con)
+		return '/books/' .. books[index]
 	end
 
 	function mod.readEbook(bookfile)
