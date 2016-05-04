@@ -766,6 +766,45 @@ local epub = (function()
 end)()
 
 
+-- MODULE control
+control = (function()
+	local mod = {}
+
+	function mod.new()
+		local cont = {}
+		cont.prevPad = Controls.read()
+		cont.pad = cont.prevPad
+
+		function cont:input()
+			self.prevPad = self.pad
+			self.pad = Controls.read()
+		end
+
+		function cont:down(key)
+			local prev = Controls.check(self.prevPad, key)
+			local curr = Controls.check(self.pad, key)
+			return curr and not prev
+		end
+
+		function cont:check(key)
+			return Controls.check(self.pad, key)
+		end
+
+		function cont:circle()
+			return Controls.readCirclePad()
+		end
+
+		function cont:touch()
+			return Controls.readTouch()
+		end
+
+		return cont
+	end
+
+	return mod
+end)()
+
+
 --MODULE main
 main = (function()
 	mod = {}
@@ -784,6 +823,7 @@ main = (function()
 	end
 
 	function mod.readEbook(bookfile)
+		local cont = control.new()
 		local book = epub.load(bookfile)
 		local function loadImage(src)
 			return book:imageFile(src)
@@ -817,18 +857,18 @@ main = (function()
 
 		while true do
 			scrolling = false
-			local pad = Controls.read()
-			
+			cont:input()
+
 			-- handle exiting application
 			if System.checkStatus() == APP_EXITING then System.exit() end
-			if Controls.check(pad, KEY_START) then System.exit() end
-			if Controls.check(pad, KEY_HOME) then
+			if cont:check(KEY_START) then System.exit() end
+			if cont:check(KEY_HOME) then
 				System.showHomeMenu()
 				dirty = true
 				scrolling = true
 			end
 
-			if Controls.check(pad, KEY_A) then
+			if cont:down(KEY_A) then
 				-- pageData.bookmarked = book:toggleBookmark()
 				book:toggleBookmark()
 				pageData = compileBook()
@@ -836,12 +876,12 @@ main = (function()
 			end
 
 			-- flip pages
-			if Controls.check(pad, KEY_DLEFT) then
+			if cont:check(KEY_DLEFT) then
 				book:flipBackward()
 				pageData = compileBook()
 				y, dy, dirty = 0, 0, true
 				scrolling = true -- hack to make it feel more snappy
-			elseif Controls.check(pad, KEY_DRIGHT) then
+			elseif cont:check(KEY_DRIGHT) then
 				book:flipForward()
 				pageData = compileBook()
 				y, dy, dirty = 0, 0, true
@@ -849,16 +889,16 @@ main = (function()
 			end
 
 			-- dpad controls have fixed velocity
-			if Controls.check(pad, KEY_DUP) then
+			if cont:check(KEY_DUP) then
 				dy = -dPadSpeed
 				scrolling = true
-			elseif Controls.check(pad, KEY_DDOWN) then
+			elseif cont:check(KEY_DDOWN) then
 				dy = dPadSpeed
 				scrolling = true
 			end
 
 			-- the circle pad scrolls proportionally
-			local _, cPadY = Controls.readCirclePad()
+			local _, cPadY = cont:circle()
 			if math.abs(cPadY) > 30 then
 				dy = math.floor(-cPadY/10)
 				scrolling = true
@@ -866,7 +906,7 @@ main = (function()
 
 			-- touch controls have velocity based on previous position
 			prevTouchY = touchY
-			_, touchY = Controls.readTouch()
+			_, touchY = cont:touch()
 			if touchY ~= 0 and prevTouchY ~= 0 then
 				dy = prevTouchY - touchY
 				scrolling = true
