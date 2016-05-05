@@ -819,15 +819,28 @@ main = (function()
 	end
 
 	function mod.chooseEbook()
-		local con = Console.new(BOTTOM_SCREEN)
 		local cont = control.new()
 		local index = 1
 		local books = {}
+		local dirty = true
 		for _, file in ipairs(System.listDirectory('/books')) do
 			if file.name:sub(-5) == '.epub' then
 				table.insert(books, file.name)
 			end
 		end
+
+		local function makeIdata(books, index)
+			local result = {}
+			for i, book in ipairs(books) do
+				if i == index then
+					table.insert(result, {type='h2', content=book})
+				else
+					table.insert(result, {type='p', content=book})
+				end
+			end
+			return render.compileHTML(result, nil, nil, false)
+		end
+		local idata = makeIdata(books, index)
 
 		while true do
 			cont:input()
@@ -842,27 +855,22 @@ main = (function()
 
 			if cont:down(KEY_DUP) then
 				index = math.max(1, index - 1)
+				idata = makeIdata(books, index)
+				dirty = true
 			elseif cont:down(KEY_DDOWN) then
 				index = math.min(index + 1, #books)
+				idata = makeIdata(books, index)
+				dirty = true
 			end
 
-			Screen.waitVblankStart()
-			Screen.refresh()
-			Screen.clear(BOTTOM_SCREEN)
-			Console.clear(con)
-			for i, book in ipairs(books) do
-				if i == index then
-					-- set color to red
-					-- book = '\x1b[31m'..book..'\x1b[0m'
-					book = '> ' .. book
-				end
-				Console.append(con, book..'\n')
+			if not dirty then
+				render.idle()
+			else
+				render.main(idata, 0, false)
+				dirty = false
 			end
-			Console.show(con)
-			Screen.flip()
 		end
 
-		Console.destroy(con)
 		return '/books/' .. books[index]
 	end
 
