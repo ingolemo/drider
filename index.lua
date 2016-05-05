@@ -426,8 +426,10 @@ local render = (function()
 		local screenBottom = screenMiddle + 240
 
 		-- page counter
-		Font.setPixelSizes(italicFont, h1Size)
-		Font.print(italicFont, 5, 0, idata.pagenum, bg, TOP_SCREEN)
+		if idata.pagenum ~= nil then
+			Font.setPixelSizes(italicFont, h1Size)
+			Font.print(italicFont, 5, 0, idata.pagenum, bg, TOP_SCREEN)
+		end
 
 		-- bookmark
 		if idata.bookmarked then
