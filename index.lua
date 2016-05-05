@@ -812,8 +812,10 @@ main = (function()
 	local mod = {}
 
 	function mod.run()
-		local bookfile = mod.chooseEbook()
-		mod.readEbook(bookfile)
+		while true do
+			local bookfile = mod.chooseEbook()
+			mod.readEbook(bookfile)
+		end
 	end
 
 	function mod.chooseEbook()
@@ -904,6 +906,7 @@ main = (function()
 			-- handle exiting application
 			if System.checkStatus() == APP_EXITING then System.exit() end
 			if cont:check(KEY_START) then System.exit() end
+			if cont:check(KEY_SELECT) then break end
 			if cont:check(KEY_HOME) then
 				System.showHomeMenu()
 				dirty = true
