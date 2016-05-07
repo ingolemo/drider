@@ -52,7 +52,7 @@ local function utf8ToAscii(text)
 	-- most of my books seem to use utf8. I don't want to do full text
 	-- re-encoding in lua so we just make some simple substitutions to
 	-- increase readability.
-	
+
 	-- curly quotes
 	text = text:gsub('\xe2\x80\x9c', '"')
 	text = text:gsub('\xe2\x80\x9d', '"')
@@ -818,29 +818,21 @@ main = (function()
 		end
 	end
 
-	function mod.chooseEbook()
+	function mod.choose(choices)
 		local cont = control.new()
 		local index = 1
-		local books = {}
 		local dirty = true
-		for _, file in ipairs(System.listDirectory('/books')) do
-			if file.name:sub(-5) == '.epub' then
-				table.insert(books, file.name)
-			end
-		end
 
-		local function makeIdata(books, index)
+		local function makeIdata(choices, index)
 			local result = {}
-			for i, book in ipairs(books) do
-				if i == index then
-					table.insert(result, {type='h2', content=book})
-				else
-					table.insert(result, {type='p', content=book})
-				end
+			for i, choice in ipairs(choices) do
+				local type = 'p'
+				if i == index then type = 'h2' end
+				table.insert(result, {type=type, content=choice})
 			end
 			return render.compileHTML(result, nil, nil, false)
 		end
-		local idata = makeIdata(books, index)
+		local idata = makeIdata(choices, index)
 
 		while true do
 			cont:input()
@@ -855,11 +847,11 @@ main = (function()
 
 			if cont:down(KEY_DUP) then
 				index = math.max(1, index - 1)
-				idata = makeIdata(books, index)
+				idata = makeIdata(choices, index)
 				dirty = true
 			elseif cont:down(KEY_DDOWN) then
-				index = math.min(index + 1, #books)
-				idata = makeIdata(books, index)
+				index = math.min(index + 1, #choices)
+				idata = makeIdata(choices, index)
 				dirty = true
 			end
 
@@ -871,7 +863,18 @@ main = (function()
 			end
 		end
 
-		return '/books/' .. books[index]
+		return choices[index]
+	end
+
+	function mod.chooseEbook()
+		local books = {}
+		for _, file in ipairs(System.listDirectory('/books')) do
+			if file.name:sub(-5) == '.epub' then
+				table.insert(books, file.name)
+			end
+		end
+
+		return '/books/' .. mod.choose(books)
 	end
 
 	function mod.readEbook(bookfile)
