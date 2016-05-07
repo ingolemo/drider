@@ -12,11 +12,7 @@ cia: build/drider.cia
 	cp -f index.lua build/3ds/drider/
 	cp -f bookmark.png build/3ds/drider/
 	cp -f build/drider.smdh build/3ds/drider/
-	cp -f external/title.ttf build/3ds/drider/
-	cp -f external/book_regular.ttf build/3ds/drider/
-	cp -f external/book_bold.ttf build/3ds/drider/
-	cp -f external/book_italic.ttf build/3ds/drider/
-	cp -f external/book_bold_italic.ttf build/3ds/drider/
+	cp -f external/*.ttf build/3ds/drider/
 	cp -f external/lpp-3ds.3dsx build/3ds/drider/drider.3dsx
 
 upload: cia

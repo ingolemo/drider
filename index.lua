@@ -379,11 +379,9 @@ local render = (function()
 	local h2Size = 28
 	local h3Size = 24
 	local bookSize = 16
-	local regularFont = Font.load('/3ds/drider/book_regular.ttf')
-	local italicFont = Font.load('/3ds/drider/book_italic.ttf')
-	-- local boldFont = Font.load('/3ds/drider/book_bold.ttf')
-	-- local boldItalicFont = Font.load('/3ds/drider/book_bold_italic.ttf')
-	local titleFont = Font.load('/3ds/drider/title.ttf')
+	local regularFont = Font.load('/3ds/drider/gentium_regular.ttf')
+	local italicFont = Font.load('/3ds/drider/gentium_italic.ttf')
+	local titleFont = italicFont
 
 	local bmImage = Screen.loadImage('/3ds/drider/bookmark.png')
 
