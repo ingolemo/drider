@@ -576,24 +576,56 @@ local render = (function()
 		return height
 	end
 
-	function mod.main(idata, top, quick)
-		-- draws some compiled render data to the screen
-		Screen.waitVblankStart()
+	function mod.prepareScreens()
 		Screen.refresh()
 		Screen.clear(TOP_SCREEN)
 		Screen.clear(BOTTOM_SCREEN)
 		Screen.fillRect(0, 399, 0, 239, paper, TOP_SCREEN)
 		Screen.fillRect(0, 319, 0, 239, paper, BOTTOM_SCREEN)
-		mod.renderData(idata, top, quick)
+	end
+
+	function mod.finaliseScreens()
 		Screen.flip()
+		Screen.waitVblankStart()
+	end
+
+	function mod.menu(choices, selected)
+		local middle = math.floor(120 - h2Size/2)
+		local context = 3
+		Font.setPixelSizes(titleFont, h2Size)
+		Font.setPixelSizes(regularFont, bookSize)
+		mod.prepareScreens()
+		for index, choice in ipairs(choices) do
+			local offset = index - selected
+			if -context <= offset and offset < 0 then
+				-- above
+				local y = middle + offset * bookSize
+				Font.print(regularFont, 40, y, choice, ink, TOP_SCREEN)
+			elseif offset == 0 then
+				-- selected item
+				Font.print(titleFont, 40, middle, choice, ink, TOP_SCREEN)
+			elseif 0 < offset and offset <= context then
+				--below
+				local y = middle + (offset-1) * bookSize + h2Size
+				Font.print(regularFont, 40, y, choice, ink, TOP_SCREEN)
+			end
+		end
+		mod.finaliseScreens()
+	end
+
+	function mod.main(idata, top, quick)
+		-- draws some compiled render data to the screen
+		mod.prepareScreens()
+		mod.renderData(idata, top, quick)
+		mod.finaliseScreens()
 	end
 
 	function mod.idle()
 		-- does basically nothing but waits. This is used when nothing
 		-- has changed since the last call to mod.main, as it is faster
 		-- to just not clear the screen.
-		Screen.waitVblankStart()
 		Screen.refresh()
+		Screen.waitVblankStart()
 	end
 
 	return mod
@@ -821,16 +853,6 @@ main = (function()
 		local index = 1
 		local dirty = true
 
-		local function makeIdata(choices, index)
-			local result = {}
-			for i, choice in ipairs(choices) do
-				local type = 'p'
-				if i == index then type = 'h2' end
-				table.insert(result, {type=type, content=choice})
-			end
-			return render.compileHTML(result, nil, nil, false)
-		end
-		local idata = makeIdata(choices, index)
 
 		while true do
 			cont:input()
@@ -845,18 +867,16 @@ main = (function()
 
 			if cont:down(KEY_DUP) then
 				index = math.max(1, index - 1)
-				idata = makeIdata(choices, index)
 				dirty = true
 			elseif cont:down(KEY_DDOWN) then
 				index = math.min(index + 1, #choices)
-				idata = makeIdata(choices, index)
 				dirty = true
 			end
 
 			if not dirty then
 				render.idle()
 			else
-				render.main(idata, 0, false)
+				render.menu(choices, index)
 				dirty = false
 			end
 		end
