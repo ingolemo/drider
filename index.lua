@@ -577,6 +577,7 @@ local render = (function()
 	end
 
 	function mod.prepareScreens()
+		Screen.waitVblankStart()
 		Screen.refresh()
 		Screen.clear(TOP_SCREEN)
 		Screen.clear(BOTTOM_SCREEN)
@@ -586,7 +587,6 @@ local render = (function()
 
 	function mod.finaliseScreens()
 		Screen.flip()
-		Screen.waitVblankStart()
 	end
 
 	function mod.menu(choices, selected)
@@ -624,8 +624,8 @@ local render = (function()
 		-- does basically nothing but waits. This is used when nothing
 		-- has changed since the last call to mod.main, as it is faster
 		-- to just not clear the screen.
-		Screen.refresh()
 		Screen.waitVblankStart()
+		Screen.refresh()
 	end
 
 	return mod
