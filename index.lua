@@ -600,14 +600,14 @@ local render = (function()
 			if -context <= offset and offset < 0 then
 				-- above
 				local y = middle + offset * bookSize
-				Font.print(regularFont, 40, y, choice, ink, TOP_SCREEN)
+				Font.print(regularFont, 40, y, choice, ink, BOTTOM_SCREEN)
 			elseif offset == 0 then
 				-- selected item
-				Font.print(titleFont, 40, middle, choice, ink, TOP_SCREEN)
+				Font.print(titleFont, 40, middle, choice, ink, BOTTOM_SCREEN)
 			elseif 0 < offset and offset <= context then
 				--below
 				local y = middle + (offset-1) * bookSize + h2Size
-				Font.print(regularFont, 40, y, choice, ink, TOP_SCREEN)
+				Font.print(regularFont, 40, y, choice, ink, BOTTOM_SCREEN)
 			end
 		end
 		mod.finaliseScreens()
