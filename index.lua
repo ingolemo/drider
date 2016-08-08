@@ -617,6 +617,13 @@ local render = (function()
 		Font.setPixelSizes(regularFont, bookSize)
 		mod.prepareScreens()
 		Screen.drawImage(75, 32, bnImage, TOP_SCREEN)
+		if #choices == 0 then
+			Font.print(titleFont, 40, middle, 'No books found',
+				ink, BOTTOM_SCREEN)
+			mod.finaliseScreens()
+			return
+		end
+
 		for index, choice in ipairs(choices) do
 			local offset = index - selected
 			if -context <= offset and offset < 0 then
@@ -883,7 +890,7 @@ main = (function()
 			if cont:check(KEY_START) then System.exit() end
 			if cont:check(KEY_HOME) then System.showHomeMenu() end
 
-			if cont:down(KEY_A) then
+			if cont:down(KEY_A) and #choices ~= 0 then
 				break
 			end
 
