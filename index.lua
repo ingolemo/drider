@@ -120,6 +120,26 @@ local pathlib = (function()
 		return mod.normalise(head .. '/' .. tail)
 	end
 
+	function mod.nearby(fname)
+		-- decides whether to load files from the sd card or the romfs
+		local sdname = '/3ds/drider/' .. fname
+		if System.doesFileExist(sdname) then
+			return sdname
+		else
+			return 'romfs:/' .. fname
+		end
+	end
+
+	function mod.ensureDirectory(dir)
+		if not System.doesFileExist(dir) then
+			System.createDirectory(dir)
+		end
+	end
+
+	mod.ensureDirectory('/3ds')
+	mod.ensureDirectory('/3ds/drider')
+	mod.ensureDirectory('/books')
+
 	return mod
 end)()
 
@@ -379,11 +399,11 @@ local render = (function()
 	local h2Size = 28
 	local h3Size = 24
 	local bookSize = 16
-	local regularFont = Font.load('/3ds/drider/gentium_regular.ttf')
-	local italicFont = Font.load('/3ds/drider/gentium_italic.ttf')
+	local regularFont = Font.load(pathlib.nearby('gentium_regular.ttf'))
+	local italicFont = Font.load(pathlib.nearby('gentium_italic.ttf'))
 	local titleFont = italicFont
 
-	local bmImage = Screen.loadImage('/3ds/drider/bookmark.png')
+	local bmImage = Screen.loadImage(pathlib.nearby('bookmark.png'))
 
 	local loadedImages = {}
 

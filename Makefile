@@ -1,18 +1,19 @@
 export PATH := tools:$(PATH)
 
+NEARBY_FILES=index.lua bookmark.png \
+	external/gentium_regular.ttf external/gentium_italic.ttf
+
 all: cia 3dsx
 
 dist: build/drider.tar.gz build/drider.zip
 
 cia: build/drider.cia
 
-3dsx: index.lua build/drider.smdh bookmark.png
+3dsx: $(NEARBY_FILES) build/drider.smdh
 	@mkdir -p build/3ds/drider
 	@mkdir -p build/books
-	cp -f index.lua build/3ds/drider/
-	cp -f bookmark.png build/3ds/drider/
+	cp -f $(NEARBY_FILES) build/3ds/drider/
 	cp -f build/drider.smdh build/3ds/drider/
-	cp -f external/*.ttf build/3ds/drider/
 	cp -f external/lpp-3ds.3dsx build/3ds/drider/drider.3dsx
 
 upload: cia
@@ -47,9 +48,9 @@ build/drider.smdh: icon.png
 		--publisher "ingolemo" \
 		--icon icon.png
 
-build/romfs.bin: index.lua
+build/romfs.bin: $(NEARBY_FILES)
 	@mkdir -p build/romfs
-	cp -f index.lua build/romfs/
+	cp -f $^ build/romfs/
 	3dstool --file $@ \
 		--create --type romfs \
 		--romfs-dir build/romfs

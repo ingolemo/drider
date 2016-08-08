@@ -55,9 +55,7 @@ the [3dstool], [bannertool], and [makerom] utilities available on your
 `drider.cia` and a `3ds` folder in the `build` directory.
 
 Homebrew Launcher users should install the `3ds` directory to the root
-of their sd card. Cia users can install the cia file, but please note
-that you will **also** need to install the `3ds` directory to the root
-of your sd card.
+of their sd card. Cia users can install the cia file.
 
 [Lua Player Plus 3ds]: https://github.com/Rinnegatamante/lpp-3ds "lpp-3ds"
 [3dstool]: https://github.com/dnasdw/3dstool
