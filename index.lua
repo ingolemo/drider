@@ -404,6 +404,7 @@ local render = (function()
 	local titleFont = italicFont
 
 	local bmImage = Screen.loadImage(pathlib.nearby('bookmark.png'))
+	local bnImage = Screen.loadImage(pathlib.nearby('banner.png'))
 
 	local loadedImages = {}
 
@@ -615,6 +616,7 @@ local render = (function()
 		Font.setPixelSizes(titleFont, h2Size)
 		Font.setPixelSizes(regularFont, bookSize)
 		mod.prepareScreens()
+		Screen.drawImage(75, 32, bnImage, TOP_SCREEN)
 		for index, choice in ipairs(choices) do
 			local offset = index - selected
 			if -context <= offset and offset < 0 then

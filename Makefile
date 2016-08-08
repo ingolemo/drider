@@ -1,6 +1,6 @@
 export PATH := tools:$(PATH)
 
-NEARBY_FILES=index.lua bookmark.png \
+NEARBY_FILES=index.lua bookmark.png banner.png \
 	external/gentium_regular.ttf external/gentium_italic.ttf
 
 all: cia 3dsx
