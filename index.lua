@@ -59,19 +59,42 @@ local function utf8ToAscii(text)
 	text = text:gsub('\xe2\x80\x98', "'")
 	text = text:gsub('\xe2\x80\x99', "'")
 
-	-- mdash
-	text = text:gsub('\xe2\x80\x94', ' - ')
+	text = text:gsub('\xe2\x80\x93', '-') -- ndash
+	text = text:gsub('\xe2\x80\x94', ' - ') -- mdash
+	text = text:gsub('\xe2\x80\xa6', '...')
 
 	return text
 end
 
 function unescapeEntities(value)
+	local function codePointToChar(n)
+		local ASCIImapping = {
+			[8211]='-',
+			[8212]=' - ',
+			[8216]="'",
+			[8217]="'",
+			[8220]='"',
+			[8221]='"',
+			[8230]='...',
+		}
+		local char = ASCIImapping[n]
+		if n < 128 then
+			-- the character is ascii so just convert it
+			return string.char(n)
+		elseif char ~= nil then
+			-- there's a decent ascii replacement symbol
+			return char
+		else
+			-- our software stack doesn't support non-ascii
+			return '?!?'
+		end
+	end
 	-- converts the entities in html and xml to literal characters
 	value = value:gsub('&#x([%x]+)%;', function(h)
-		return string.char(tonumber(h, 16))
+		return codePointToChar(tonumber(h, 16))
 	end)
 	value = value:gsub('&#([0-9]+)%;', function(h)
-		return string.char(tonumber(h, 10))
+		return codePointToChar(tonumber(h, 10))
 	end)
 	value = value:gsub('&quot;', '"')
 	value = value:gsub('&apos;', "'")
