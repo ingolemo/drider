@@ -17,7 +17,7 @@ cia: build/drider.cia
 	cp -f external/lpp-3ds.3dsx build/3ds/drider/drider.3dsx
 
 upload: cia
-	java -jar tools/sockfile* 192.168.0.12 build/drider.cia
+	python tools/servefiles.py 192.168.0.12 build/drider.cia
 
 clean:
 	rm -rf build
