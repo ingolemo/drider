@@ -438,14 +438,19 @@ local render = (function()
 
 		local ext = src:match('%.%w+$')
 		ext = '' -- disable all image loading
-		if ext == '.jpg' or ext == '.bmp' or ext == '.png' then
-			local filename = imageLoader(src)
-			local image = Screen.loadImage(filename)
-			table.insert(loadedImages, image)
-			return image
-		else
+		if ext ~= '.jpg' and ext ~= '.bmp' and ext ~= '.png' then
 			return nil
 		end
+
+		local filename = imageLoader(src)
+		local image = Screen.loadImage(filename)
+		table.insert(loadedImages, image)
+		local w = Screen.getImageWidth(image)
+		local h = Screen.getImageHeight(image)
+		if w > 300 or h > 300 then
+			return nil
+		end
+		return image
 	end
 
 	function mod.freeImages()
@@ -530,11 +535,18 @@ local render = (function()
 					top + math.floor(item.height/4),
 					top + math.floor(item.height*3/4), bg, screen)
 			elseif item.type == 'image' and not quick then
-				Screen.fillRect(left, left + item.width, top,
+				if item.data == nil then
+					Screen.fillRect(left, left + item.width, top,
+						top + item.height, bg, screen)
+					Font.setPixelSizes(italicFont, bookSize)
+					Font.print(italicFont, left + 5, top + 5, item.src,
+						paper, screen)
+				else
+					Screen.drawImage(left, top, item.data, screen)
+				end
+			elseif item.type == 'image' and quick then
+				Screen.fillEmptyRect(left, left + item.width, top,
 					top + item.height, bg, screen)
-				Font.setPixelSizes(italicFont, bookSize)
-				Font.print(italicFont, left + 5, top + 5, item.src,
-					paper, screen)
 			end
 
 			y = y + item.height
