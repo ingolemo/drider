@@ -544,13 +544,13 @@ local render = (function()
 
 	local function insertText(idata, content, font, fontSize)
 		-- approximate the width, so we can quick-draw text
-		local avgCharW = fontSize * 0.33
-		local probableTextW = math.floor(#content * avgCharW)
-		local w = math.min(300, probableTextW)
+		local w = 300
+		local h = fontSize
+		w, h = Font.measureText(font, content, 300)
 
 		table.insert(idata, {
 			type='text',
-			height=fontSize, width=w,
+			height=h, width=w,
 			font=font, fontSize=fontSize,
 			content=content,
 		})
