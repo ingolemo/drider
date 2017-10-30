@@ -1,5 +1,7 @@
 export PATH := tools:$(PATH)
 
+NET_ADDRESS=192.168.0.12
+
 NEARBY_FILES=index.lua bookmark.png banner.png \
 	external/gentium_regular.ttf external/gentium_italic.ttf
 
@@ -17,7 +19,7 @@ cia: build/drider.cia
 	cp -f external/lpp-3ds.3dsx build/3ds/drider/drider.3dsx
 
 upload: cia
-	python tools/servefiles.py 192.168.0.12 build/drider.cia
+	python tools/servefiles.py $(NET_ADDRESS) build/drider.cia
 
 clean:
 	rm -rf build
