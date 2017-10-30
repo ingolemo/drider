@@ -2,7 +2,9 @@ export PATH := tools:$(PATH)
 
 NET_ADDRESS=192.168.0.12
 
-NEARBY_FILES=index.lua bookmark.png banner.png \
+SRC=src/index.lua src/main.lua
+
+NEARBY_FILES=$(SRC) bookmark.png banner.png \
 	external/gentium_regular.ttf external/gentium_italic.ttf
 
 all: cia 3dsx

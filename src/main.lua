@@ -1078,4 +1078,4 @@ main = (function()
 	return mod
 end)()
 
-main.run()
+return main
