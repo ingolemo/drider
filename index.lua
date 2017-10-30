@@ -426,7 +426,9 @@ local render = (function()
 	local italicFont = Font.load(pathlib.nearby('gentium_italic.ttf'))
 	local titleFont = italicFont
 
-	local bmImage = Screen.loadImage(pathlib.nearby('bookmark.png'))
+	Graphics.init()
+
+	local bookmarkTex = Graphics.loadImage(pathlib.nearby('bookmark.png'))
 	local bnImage = Screen.loadImage(pathlib.nearby('banner.png'))
 
 	local loadedImages = {}
@@ -467,64 +469,26 @@ local render = (function()
 		-- The quick parameter allows us to skip slow rendering if we're
 		-- doing something where readability isn't too important, such
 		-- as scrolling.
+		local screen = Screen.createImage(400, 480, Color.new(255, 0, 255))
 		local y = 0
 
-		local screenMiddle = screenTop + 240
-		local screenBottom = screenMiddle + 240
+		local screenBottom = screenTop + 480
 
 		-- page counter
 		if idata.pagenum ~= nil then
 			Font.setPixelSizes(italicFont, h1Size)
-			Font.print(italicFont, 5, 0, idata.pagenum, bg, TOP_SCREEN)
-		end
-
-		-- bookmark
-		if idata.bookmarked then
-			local x, h = 370, 24
-			Screen.fillRect(x, x + 15, 0, h, red, TOP_SCREEN)
-			Screen.drawImage(x, h + 1, bmImage, TOP_SCREEN)
-		end
-
-		-- scrollbar
-		local maxY = mod.getHeight(idata)
-		local sbTop = math.max(0, math.floor(screenTop * 239/maxY))
-		local sbHeight = math.floor(480 * 239/maxY)
-		local sbBottom = math.min(329, sbTop + sbHeight)
-		if sbTop ~= 0 or sbBottom ~= 329 then
-			Screen.fillRect(394, 399, sbTop, sbBottom, bg, TOP_SCREEN)
+			Font.print(italicFont, 5, 0, idata.pagenum, bg, screen)
 		end
 
 		for _, item in ipairs(idata) do
-			local screen, top, left
+			local top = y - screenTop
+			local left = 40 + margin
 			local yH = y + item.height
 
-			-- if y is too close to the middle bar than advance it so
-			-- that we don't skip a line of text. We only need this hack
-			-- because we can't render something only partially on
-			-- screen and it's confusing to skip rendering text along
-			-- the middle line
-			if screenMiddle > y and yH >= screenMiddle then
-				if not quick then
-					y = screenMiddle
-				end
-			end
-
-			if screenTop <= y and yH < screenMiddle then
-				screen = TOP_SCREEN
-				top = y - screenTop
-				left = 40 + margin
-			elseif screenMiddle <= y and yH < screenBottom then
-				screen = BOTTOM_SCREEN
-				top = y - screenMiddle
-				left = margin
-			elseif screenBottom <= y then
+			if y < screenTop then
+				goto skip_render
+			elseif yH >= screenBottom then
 				break
-			else
-				-- the item's bounding box is partially offscreen
-				-- or it intersects the middle line, would use a
-				-- 'continue' here, but lua doesn't have it
-				y = y + item.height
-				goto continue
 			end
 
 			if item.type == 'text' and not quick then
@@ -549,9 +513,11 @@ local render = (function()
 					top + item.height, bg, screen)
 			end
 
+			::skip_render::
 			y = y + item.height
-			::continue::
 		end
+
+		return screen
 	end
 
 	local function insertText(idata, content, font, fontSize)
@@ -677,11 +643,43 @@ local render = (function()
 		mod.finaliseScreens()
 	end
 
+	function mod.renderBookmark(idata)
+		if idata.bookmarked then
+			local x, h = 370, 24
+			Graphics.fillRect(x, x + 16, 0, h + 1, red)
+			Graphics.drawImage(x, h + 1, bookmarkTex)
+		end
+	end
+
+	function mod.renderScrollbar(idata, screenTop)
+		local maxY = mod.getHeight(idata)
+		local sbTop = math.max(0, math.floor(screenTop * 239/maxY))
+		local sbHeight = math.floor(480 * 239/maxY)
+		local sbBottom = math.min(329, sbTop + sbHeight)
+		if sbTop ~= 0 or sbBottom ~= 329 then
+			Graphics.fillRect(394, 399, sbTop, sbBottom, bg)
+		end
+	end
+
 	function mod.main(idata, top, quick)
 		-- draws some compiled render data to the screen
-		mod.prepareScreens()
-		mod.renderData(idata, top, quick)
-		mod.finaliseScreens()
+		local screen = mod.renderData(idata, top, quick)
+		local tex = Graphics.convertFrom(screen)
+		Screen.freeImage(screen)
+
+		Graphics.initBlend(TOP_SCREEN)
+		Graphics.drawPartialImage(0, 0, 0, 0, 400, 240, tex)
+		mod.renderBookmark(idata)
+		mod.renderScrollbar(idata, top)
+		Graphics.termBlend()
+
+		Graphics.initBlend(BOTTOM_SCREEN)
+		Graphics.drawPartialImage(0, 0, 40, 240, 320, 240, tex)
+		Graphics.termBlend()
+
+		Graphics.flip()
+
+		Graphics.freeImage(tex)
 	end
 
 	function mod.idle()
