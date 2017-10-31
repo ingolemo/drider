@@ -66,4 +66,5 @@ build/drider.cia: build/romfs.bin build/drider.bnr drider.rsf build/drider.smdh
 		-rsf drider.rsf \
 		-romfs build/romfs.bin \
 		-banner build/drider.bnr \
-		-icon build/drider.smdh
+		-icon build/drider.smdh \
+		-logo external/homebrew_logo.bcma.lz
