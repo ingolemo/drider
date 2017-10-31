@@ -1,30 +1,158 @@
 -- this module holds all the code for rendering an html fragment such as
 -- that produced by the html module
 local render = {}
+local utils = import('utils')
 local pathlib = import('pathlib')
+
+local ink = Color.new(0, 0, 0)
+local paper = Color.new(255, 255, 200)
+local pencil = Color.new(230, 230, 180)
+local red = Color.new(175, 18, 18)
+
+local regularFont = Font.load(pathlib.nearby('gentium_regular.ttf'))
+local italicFont = Font.load(pathlib.nearby('gentium_italic.ttf'))
+
+Graphics.init()
+
+local function renderText(text, font, size, fgColor)
+	local width, height, image, texture
+	local magenta = Color.new(255, 0, 255)
+
+	Font.setPixelSizes(font, size)
+	width, height = Font.measureText(font, text)
+	image = Screen.createImage(width, height, magenta)
+	Font.print(font, 0, 0, text, fgColor, image)
+	texture = Graphics.convertFrom(image)
+	Screen.freeImage(image)
+	return texture
+end
+
+-- CLASS: MenuRenderer
+render.MenuRenderer = {}
+render.MenuRenderer.__index = render.MenuRenderer
+render.MenuRenderer.size = 20
+render.MenuRenderer.banner = Graphics.loadImage(pathlib.nearby('banner.png'))
+function render.MenuRenderer:new(choices)
+	local obj = {}
+	setmetatable(obj, render.MenuRenderer)
+	obj.dirty = true
+	obj.selected = 1
+	obj.position = -100
+	obj.choices = {}
+	for _, choice in ipairs(choices) do
+		local tex = renderText(choice, regularFont, self.size, ink, paper)
+		table.insert(obj.choices, tex)
+	end
+	return obj
+end
+
+function render.MenuRenderer:free()
+	for _, choice in ipairs(self.choices) do
+		Graphics.freeImage(choice)
+	end
+end
+
+function render.MenuRenderer:select(selected)
+	self.selected = selected
+	self.dirty = true
+end
+
+function render.MenuRenderer:drawChoices()
+	local middle = 240 / 2
+	for i, tex in ipairs(self.choices) do
+		local rel_i = i - self.position
+		local offset = middle - self.size/2
+		local y = rel_i * self.size + offset
+		local color = paper
+		if i == self.selected then
+			color = red
+			Graphics.fillRect(0, 320, y, y + self.size, color)
+		end
+		Graphics.drawImage(10, y, tex, color)
+	end
+end
+
+function render.MenuRenderer:update()
+	if math.abs(self.position - self.selected) > 0.1 then
+		self.position = utils.lerp(self.position, self.selected, 0.1)
+		self.dirty = true
+	end
+end
+
+function render.MenuRenderer:draw()
+	Screen.waitVblankStart()
+	if not self.dirty then
+		return
+	end
+
+	Graphics.initBlend(TOP_SCREEN)
+	Graphics.fillRect(0, 400, 0, 240, paper)
+	Graphics.drawImage(75, 32, self.banner)
+	Graphics.termBlend()
+
+	Graphics.initBlend(BOTTOM_SCREEN)
+	Graphics.fillRect(0, 320, 0, 240, paper)
+	self:drawChoices()
+	Graphics.termBlend()
+
+	Graphics.flip()
+
+	self.dirty = false
+end
+
+
+render.IDataRenderer = {}
+render.IDataRenderer.__index = render.IDataRenderer
+function render.IDataRenderer:new(idata)
+	local obj = {}
+	setmetatable(obj, render.IDataRenderer)
+	obj.dirty = true
+	obj.canvas = nil
+	obj.idata = idata
+	return obj
+end
+
+function render.IDataRenderer:scroll(amount)
+	self.dirty = true
+end
+
+function render.IDataRenderer:draw()
+	if self.dirty == true then
+		self.dirty = false
+	end
+
+	Graphics.initBlend(TOP_SCREEN)
+	Graphics.drawPartialImage(0, 0, 0, 0, 400, 240, self.canvas)
+	-- render.renderBookmark(idata)
+	-- render.renderScrollbar(idata, top)
+	Graphics.termBlend()
+
+	Graphics.initBlend(BOTTOM_SCREEN)
+	Graphics.drawPartialImage(0, 0, 40, 240, 320, 240, self.canvas)
+	Graphics.termBlend()
+
+	Graphics.flip()
+end
+
+
+
+
+
+
+
 
 local width = 320
 local minHeight = 480
 local margin = 10
 local padding = 5
 
-local ink = Color.new(0, 0, 0)
-local paper = Color.new(255, 255, 200)
-local bg = Color.new(230, 230, 180)
-local red = Color.new(175, 18, 18)
-
 local h1Size = 32
 local h2Size = 28
 local h3Size = 24
 local bookSize = 16
-local regularFont = Font.load(pathlib.nearby('gentium_regular.ttf'))
-local italicFont = Font.load(pathlib.nearby('gentium_italic.ttf'))
 local titleFont = italicFont
 
-Graphics.init()
-
 local bookmarkTex = Graphics.loadImage(pathlib.nearby('bookmark.png'))
-local bnImage = Screen.loadImage(pathlib.nearby('banner.png'))
 
 local loadedImages = {}
 
@@ -72,7 +200,7 @@ function render.renderData(idata, screenTop, quick)
 	-- page counter
 	if idata.pagenum ~= nil then
 		Font.setPixelSizes(italicFont, h1Size)
-		Font.print(italicFont, 5, 0, idata.pagenum, bg, screen)
+		Font.print(italicFont, 5, 0, idata.pagenum, pencil, screen)
 	end
 
 	for _, item in ipairs(idata) do
@@ -92,11 +220,11 @@ function render.renderData(idata, screenTop, quick)
 		elseif item.type == 'text' and quick then
 			Screen.fillRect(left, left + item.width,
 				top + math.floor(item.height/4),
-				top + math.floor(item.height*3/4), bg, screen)
+				top + math.floor(item.height*3/4), pencil, screen)
 		elseif item.type == 'image' and not quick then
 			if item.data == nil then
 				Screen.fillRect(left, left + item.width, top,
-					top + item.height, bg, screen)
+					top + item.height, pencil, screen)
 				Font.setPixelSizes(italicFont, bookSize)
 				Font.print(italicFont, left + 5, top + 5, item.src,
 					paper, screen)
@@ -105,7 +233,7 @@ function render.renderData(idata, screenTop, quick)
 			end
 		elseif item.type == 'image' and quick then
 			Screen.fillEmptyRect(left, left + item.width, top,
-				top + item.height, bg, screen)
+				top + item.height, pencil, screen)
 		end
 
 		::skip_render::
@@ -193,51 +321,6 @@ function render.getHeight(idata)
 	return height
 end
 
-function render.prepareScreens()
-	Screen.waitVblankStart()
-	Screen.refresh()
-	Screen.clear(TOP_SCREEN)
-	Screen.clear(BOTTOM_SCREEN)
-	Screen.fillRect(0, 399, 0, 239, paper, TOP_SCREEN)
-	Screen.fillRect(0, 319, 0, 239, paper, BOTTOM_SCREEN)
-end
-
-function render.finaliseScreens()
-	Screen.flip()
-end
-
-function render.menu(choices, selected)
-	local middle = math.floor(120 - h2Size/2)
-	local context = 3
-	Font.setPixelSizes(titleFont, h2Size)
-	Font.setPixelSizes(regularFont, bookSize)
-	render.prepareScreens()
-	Screen.drawImage(75, 32, bnImage, TOP_SCREEN)
-	if #choices == 0 then
-		Font.print(titleFont, 40, middle, 'No books found',
-			ink, BOTTOM_SCREEN)
-		render.finaliseScreens()
-		return
-	end
-
-	for index, choice in ipairs(choices) do
-		local offset = index - selected
-		if -context <= offset and offset < 0 then
-			-- above
-			local y = middle + offset * bookSize
-			Font.print(regularFont, 40, y, choice, ink, BOTTOM_SCREEN)
-		elseif offset == 0 then
-			-- selected item
-			Font.print(titleFont, 40, middle, choice, ink, BOTTOM_SCREEN)
-		elseif 0 < offset and offset <= context then
-			--below
-			local y = middle + (offset-1) * bookSize + h2Size
-			Font.print(regularFont, 40, y, choice, ink, BOTTOM_SCREEN)
-		end
-	end
-	render.finaliseScreens()
-end
-
 function render.renderBookmark(idata)
 	if idata.bookmarked then
 		local x, h = 370, 24
@@ -252,7 +335,7 @@ function render.renderScrollbar(idata, screenTop)
 	local sbHeight = math.floor(480 * 239/maxY)
 	local sbBottom = math.min(329, sbTop + sbHeight)
 	if sbTop ~= 0 or sbBottom ~= 329 then
-		Graphics.fillRect(394, 399, sbTop, sbBottom, bg)
+		Graphics.fillRect(394, 399, sbTop, sbBottom, pencil)
 	end
 end
 

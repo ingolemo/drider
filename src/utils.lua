@@ -107,6 +107,10 @@ function utils.unescapeEntities(value)
 	return value
 end
 
+function utils.lerp(start, stop, amount)
+	return start + (stop - start) * amount
+end
+
 function error(message)
 	-- a simple function that halts the program and displays a message
 	-- on the screen until the user presses START. Used for debugging.

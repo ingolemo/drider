@@ -14,8 +14,7 @@ end
 function main.choose(choices)
 	local cont = control.new()
 	local index = 1
-	local dirty = true
-
+	local menu = render.MenuRenderer:new(choices)
 
 	while true do
 		cont:input()
@@ -30,20 +29,17 @@ function main.choose(choices)
 
 		if cont:down(KEY_DUP) then
 			index = math.max(1, index - 1)
-			dirty = true
+			menu:select(index)
 		elseif cont:down(KEY_DDOWN) then
 			index = math.min(index + 1, #choices)
-			dirty = true
+			menu:select(index)
 		end
 
-		if not dirty then
-			render.idle()
-		else
-			render.menu(choices, index)
-			dirty = false
-		end
+		menu:update()
+		menu:draw()
 	end
 
+	menu:free()
 	return choices[index]
 end
 
