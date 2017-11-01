@@ -17,7 +17,7 @@ function main.choose(choices)
 	local menu = render.MenuRenderer:new(choices)
 
 	while true do
-		cont:input()
+		cont:update()
 
 		if System.checkStatus() == APP_EXITING then System.exit() end
 		if cont:check(KEY_START) then System.exit() end
@@ -57,119 +57,54 @@ end
 function main.readEbook(bookfile)
 	local cont = control.new()
 	local book = epub.load(bookfile)
-	local function loadImage(src)
-		return book:imageFile(src)
-	end
-	local function compileBook()
-		return render.compileHTML(
-			book:currentPageHTML(), loadImage,
-			book.pagenum, book:isCurrentBookmarked()
-		)
-	end
-	local pageData = compileBook()
-
-	-- the position and velocity of the screen viewport relative to
-	-- the top of the ebook
-	local y, dy = 0, 0
-
-	-- constants to specify how fast the screen scrolls and slows
-	-- down
-	local dPadSpeed, friction = 10, 2
-
-	-- whether y has change since the last time the screen was fully
-	-- drawn
-	local dirty = true
-
-	-- whether any screen scrolling inputs have been made since the
-	-- last frame
-	local scrolling = false
-
-	-- vars to hold the state of the touchpad
-	local touchY, prevTouchY = 0, 0
+	local page = render.PageRenderer:new(book)
 
 	while true do
-		scrolling = false
-		cont:input()
+		cont:update()
 
-		-- handle exiting application
 		if System.checkStatus() == APP_EXITING then System.exit() end
 		if cont:check(KEY_START) then System.exit() end
 		if cont:check(KEY_SELECT) then break end
 		if cont:check(KEY_HOME) then
 			System.showHomeMenu()
-			dirty = true
-			scrolling = true
 		end
 
 		if cont:down(KEY_A) then
-			-- pageData.bookmarked = book:toggleBookmark()
 			book:toggleBookmark()
-			pageData = compileBook()
-			dirty = true
 		end
 
-		-- flip pages
 		if cont:check(KEY_DLEFT) then
 			book:flipBackward()
-			pageData = compileBook()
-			y, dy, dirty = 0, 0, true
-			scrolling = true -- hack to make it feel more snappy
+			page:free()
+			page = render.PageRenderer:new(book)
 		elseif cont:check(KEY_DRIGHT) then
 			book:flipForward()
-			pageData = compileBook()
-			y, dy, dirty = 0, 0, true
-			scrolling = true -- hack to make it feel more snappy
+			page:free()
+			page = render.PageRenderer:new(book)
 		end
 
-		-- dpad controls have fixed velocity
 		if cont:check(KEY_DUP) then
-			dy = -dPadSpeed
-			scrolling = true
+			page:scroll(-10)
 		elseif cont:check(KEY_DDOWN) then
-			dy = dPadSpeed
-			scrolling = true
+			page:scroll(10)
 		end
 
-		-- the circle pad scrolls proportionally
-		local _, cPadY = cont:circle()
-		if math.abs(cPadY) > 30 then
-			dy = math.floor(-cPadY/10)
-			scrolling = true
+		local _, dy = cont:circle()
+		if dy ~= nil and math.abs(dy) > 30 then
+			dy = math.floor(dy/10)
+			page:scroll(-dy)
 		end
 
-		-- touch controls have velocity based on previous position
-		prevTouchY = touchY
-		_, touchY = cont:touch()
-		if touchY ~= 0 and prevTouchY ~= 0 then
-			dy = prevTouchY - touchY
-			scrolling = true
+		local _, dy = cont:touchDiff()
+		if dy ~= nil and dy ~= 0 then
+			page:scroll(-dy)
 		end
 
-		-- apply velocity
-		if dy ~= 0 then
-			if not scrolling then
-				-- apply friction
-				local abs = math.abs(dy)
-				dy = (math.max(0, abs - friction) * math.floor(dy / abs))
-			end
-			y, dirty = y + dy, true
-		end
-
-		--clamp vertical position and velocity when at edge of book
-		local maxY = render.getHeight(pageData) - 480
-		if y < 0 then y, dy, dirty = 0, 0, true end
-		if y > maxY then y, dy, dirty = maxY, 0, true end
-
-		-- draw to screen
-		if not dirty then
-			render.idle()
-		elseif scrolling or dy ~= 0 then
-			render.main(pageData, y, true)
-		else
-			render.main(pageData, y, false)
-			dirty = false
-		end
+		page:update()
+		page:draw()
 	end
+
+	page:free()
 end
 
 return main

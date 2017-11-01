@@ -4,10 +4,14 @@ function control.new()
 	local cont = {}
 	cont.prevPad = Controls.read()
 	cont.pad = cont.prevPad
+	cont.ctx, cont.cty = Controls.readTouch()
+	cont.ptx, cont.pty = cont.ctx, cont.cty
 
-	function cont:input()
+	function cont:update()
 		self.prevPad = self.pad
 		self.pad = Controls.read()
+		self.ptx, self.pty = self.ctx, self.cty
+		self.ctx, self.cty = Controls.readTouch()
 	end
 
 	function cont:down(key)
@@ -25,7 +29,14 @@ function control.new()
 	end
 
 	function cont:touch()
-		return Controls.readTouch()
+		return self.ctx, self.cty
+	end
+
+	function cont:touchDiff()
+		if self.ctx == 0 or self.cty == 0 or self.ptx == 0 or self.pty == 0 then
+			return nil
+		end
+		return self.ctx - self.ptx, self.cty - self.pty
 	end
 
 	return cont
