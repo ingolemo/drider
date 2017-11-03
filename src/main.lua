@@ -84,19 +84,20 @@ function main.readEbook(bookfile)
 		end
 
 		if cont:check(KEY_DUP) then
-			page:scroll(-10)
+			page:accel(-5)
 		elseif cont:check(KEY_DDOWN) then
-			page:scroll(10)
+			page:accel(5)
 		end
 
 		local _, dy = cont:circle()
-		if dy ~= nil and math.abs(dy) > 30 then
-			dy = math.floor(dy/10)
-			page:scroll(-dy)
+		if dy ~= nil and math.abs(dy) > 10 then
+			local sign, amount = utils.sign_abs(dy)
+			amount = ((amount/155)^3) * 30
+			page:accel(-1 * sign * amount)
 		end
 
 		local _, dy = cont:touchDiff()
-		if dy ~= nil and dy ~= 0 then
+		if dy ~= nil then
 			page:scroll(-dy)
 		end
 

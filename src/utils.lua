@@ -111,6 +111,14 @@ function utils.lerp(start, stop, amount)
 	return start + (stop - start) * amount
 end
 
+function utils.sign_abs(number)
+	local sign = 1
+	if number < 0 then
+		sign = -1
+	end
+	return sign, math.abs(number)
+end
+
 function error(message)
 	-- a simple function that halts the program and displays a message
 	-- on the screen until the user presses START. Used for debugging.

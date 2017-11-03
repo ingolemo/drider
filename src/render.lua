@@ -114,12 +114,14 @@ render.PageRenderer.h2size = 28
 render.PageRenderer.h3size = 24
 render.PageRenderer.psize = 16
 render.PageRenderer.textwidth = 320 - margin*2
+render.PageRenderer.friction = 0.95
 function render.PageRenderer:new(book)
 	local obj = {}
 	setmetatable(obj, render.PageRenderer)
 	obj.book = book
 	obj.textures = {}
 	obj.position = 0
+	obj.velocity = 0
 	obj.dirty = true
 	obj:__compile()
 	obj:__calcHeight()
@@ -205,13 +207,30 @@ function render.PageRenderer:loadImage(src)
 end
 
 function render.PageRenderer:scroll(amount)
-	self.position = self.position + amount
-	self.position = math.max(0, math.min(self.position, self.height - 480))
+	self.velocity = amount
+end
 
-	self.dirty = true
+function render.PageRenderer:accel(amount)
+	if math.abs(self.velocity) < math.abs(amount) then
+		self.velocity = amount
+	end
 end
 
 function render.PageRenderer:update()
+	if math.abs(self.velocity) > 0.1 then
+		self.position = self.position + self.velocity
+		self.velocity = self.velocity * self.friction
+
+		if self.position < 0 then
+			self.position = 0
+			self.velocity = 0
+		elseif self.position > self.height - 480 then
+			self.position = self.height - 480
+			self.velocity = 0
+		end
+
+		self.dirty = true
+	end
 end
 
 function render.PageRenderer:drawBookmark()
