@@ -221,11 +221,12 @@ function render.PageRenderer:update()
 		self.position = self.position + self.velocity
 		self.velocity = self.velocity * self.friction
 
+		if self.position > self.height - 480 then
+			self.position = self.height - 480
+			self.velocity = 0
+		end
 		if self.position < 0 then
 			self.position = 0
-			self.velocity = 0
-		elseif self.position > self.height - 480 then
-			self.position = self.height - 480
 			self.velocity = 0
 		end
 
