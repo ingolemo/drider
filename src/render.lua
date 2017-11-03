@@ -167,7 +167,7 @@ function render.PageRenderer:__compile()
 			local image, w, h = self:loadImage(item.src)
 			table.insert(self.idata, {
 				type='image', height=h, width=w,
-				src=item.src, data=image,
+				src=item.src, render=image,
 			})
 		else
 			local msg = '[WARNING: Unknown tag %q]'
@@ -198,10 +198,6 @@ function render.PageRenderer:loadImage(src)
 	table.insert(self.textures, image)
 	local w = Graphics.getImageWidth(image)
 	local h = Graphics.getImageHeight(image)
-
-	if w > self.textwidth or h > 300 then
-		return nil, self.textwidth, 80
-	end
 
 	return image, w, h
 end
@@ -273,20 +269,18 @@ function render.PageRenderer:drawContents(left, top, bottom)
 			end
 			Graphics.drawImage(left, y - top, item.render, paper)
 		elseif item.type == 'image' then
-			if item.data == nil then
-				Graphics.fillRect(
-					left, left + item.width,
-					y - top, y - top + item.height,
-					pencil
+			if item.render == nil then
+				item.render = renderText(
+					string.format('(Image: %s)', item.content),
+					italicFont, 20, pencil, self.textwidth
 				)
-				-- Screen.fillRect(left, left + item.width, top,
-				-- 	top + item.height, pencil, screen)
-				-- Font.setPixelSizes(italicFont, bookSize)
-				-- Font.print(italicFont, left + 5, top + 5, item.src,
-				-- 	paper, screen)
-			else
-				Graphics.drawImage(left, y - top, item.data)
+				table.insert(self.textures, item.render)
 			end
+			local scale = 1
+			if item.width > self.textwidth then
+				scale = self.textwidth / item.width
+			end
+			Graphics.drawScaleImage(left, y - top, item.render, scale, scale)
 		end
 
 		::skip_drawing::
