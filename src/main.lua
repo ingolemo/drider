@@ -13,7 +13,7 @@ end
 
 function main.choose(choices)
 	local cont = control.new()
-	local index = 1
+	local index = 0
 	local menu = render.MenuRenderer:new(choices)
 
 	while true do
@@ -28,11 +28,11 @@ function main.choose(choices)
 		end
 
 		if cont:down(KEY_DUP) then
-			index = math.max(1, index - 1)
-			menu:select(index)
+			index = (index - 1) % #choices
+			menu:select(index + 1)
 		elseif cont:down(KEY_DDOWN) then
-			index = math.min(index + 1, #choices)
-			menu:select(index)
+			index = (index + 1) % #choices
+			menu:select(index + 1)
 		end
 
 		menu:update()
@@ -40,7 +40,7 @@ function main.choose(choices)
 	end
 
 	menu:free()
-	return choices[index]
+	return choices[index + 1]
 end
 
 function main.chooseEbook()
