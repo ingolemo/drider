@@ -84,21 +84,23 @@ function main.readEbook(bookfile)
 		end
 
 		if cont:key(KEY_DUP):check() then
-			page:accel(-5)
+			page:scroll(-5)
 		elseif cont:key(KEY_DDOWN):check() then
-			page:accel(5)
+			page:scroll(5)
 		end
 
 		local _, dy = cont:circle()
-		if dy ~= nil and math.abs(dy) > 10 then
-			local sign, amount = utils.sign_abs(dy)
-			amount = ((amount/155)^3) * 30
-			page:accel(-1 * sign * amount)
+		if dy ~= nil and math.abs(dy) > 30 then
+			-- undo friction
+			page.velocity = page.velocity * (1/page.friction)
+
+			local sign, value = utils.sign_abs(dy)
+			page.velocity = page.velocity + (-1) * sign * ((value - 30) / 100.0)
 		end
 
 		local _, dy = cont:touchDiff()
 		if dy ~= nil then
-			page:scroll(-dy)
+			page.velocity = -dy
 		end
 
 		page:update()

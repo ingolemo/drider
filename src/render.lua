@@ -203,31 +203,25 @@ function render.PageRenderer:loadImage(src)
 end
 
 function render.PageRenderer:scroll(amount)
-	self.velocity = amount
-end
+	self.position = self.position + amount
+	self.dirty = true
 
-function render.PageRenderer:accel(amount)
-	if math.abs(self.velocity) < math.abs(amount) then
-		self.velocity = amount
+	if self.position > self.height - 480 then
+		self.position = self.height - 480
+		self.velocity = 0
+	end
+
+	if self.position < 0 then
+		self.position = 0
+		self.velocity = 0
 	end
 end
 
 function render.PageRenderer:update()
 	if math.abs(self.velocity) > 0.1 then
-		self.position = self.position + self.velocity
-		self.velocity = self.velocity * self.friction
-
-		if self.position > self.height - 480 then
-			self.position = self.height - 480
-			self.velocity = 0
-		end
-		if self.position < 0 then
-			self.position = 0
-			self.velocity = 0
-		end
-
-		self.dirty = true
+		self:scroll(self.velocity)
 	end
+	self.velocity = self.velocity * self.friction
 end
 
 function render.PageRenderer:drawBookmark()
