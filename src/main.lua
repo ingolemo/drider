@@ -12,7 +12,7 @@ function main.run()
 end
 
 function main.choose(choices)
-	local cont = control.new()
+	local cont = control.Controls:new()
 	local index = 0
 	local menu = render.MenuRenderer:new(choices)
 
@@ -20,17 +20,17 @@ function main.choose(choices)
 		cont:update()
 
 		if System.checkStatus() == APP_EXITING then System.exit() end
-		if cont:check(KEY_START) then System.exit() end
-		if cont:check(KEY_HOME) then System.showHomeMenu() end
+		if cont:key(KEY_START):down() then System.exit() end
+		if cont:key(KEY_HOME):down() then System.showHomeMenu() end
 
-		if cont:down(KEY_A) and #choices ~= 0 then
+		if cont:key(KEY_A):down() and #choices ~= 0 then
 			break
 		end
 
-		if cont:down(KEY_DUP) then
+		if cont:key(KEY_DUP):down() then
 			index = (index - 1) % #choices
 			menu:select(index + 1)
-		elseif cont:down(KEY_DDOWN) then
+		elseif cont:key(KEY_DDOWN):down() then
 			index = (index + 1) % #choices
 			menu:select(index + 1)
 		end
@@ -55,7 +55,7 @@ function main.chooseEbook()
 end
 
 function main.readEbook(bookfile)
-	local cont = control.new()
+	local cont = control.Controls:new()
 	local book = epub.load(bookfile)
 	local page = render.PageRenderer:new(book)
 
@@ -63,29 +63,29 @@ function main.readEbook(bookfile)
 		cont:update()
 
 		if System.checkStatus() == APP_EXITING then System.exit() end
-		if cont:check(KEY_START) then System.exit() end
-		if cont:check(KEY_SELECT) then break end
-		if cont:check(KEY_HOME) then
+		if cont:key(KEY_START):down() then System.exit() end
+		if cont:key(KEY_SELECT):down() then break end
+		if cont:key(KEY_HOME):down() then
 			System.showHomeMenu()
 		end
 
-		if cont:down(KEY_A) then
+		if cont:key(KEY_A):down() then
 			book:toggleBookmark()
 		end
 
-		if cont:check(KEY_DLEFT) then
+		if cont:key(KEY_DLEFT):down() then
 			book:flipBackward()
 			page:free()
 			page = render.PageRenderer:new(book)
-		elseif cont:check(KEY_DRIGHT) then
+		elseif cont:key(KEY_DRIGHT):down() then
 			book:flipForward()
 			page:free()
 			page = render.PageRenderer:new(book)
 		end
 
-		if cont:check(KEY_DUP) then
+		if cont:key(KEY_DUP):check() then
 			page:accel(-5)
-		elseif cont:check(KEY_DDOWN) then
+		elseif cont:key(KEY_DDOWN):check() then
 			page:accel(5)
 		end
 
