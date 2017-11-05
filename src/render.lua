@@ -165,9 +165,10 @@ function render.PageRenderer:__compile()
 			end
 		elseif item.type == 'img' then
 			local image, w, h = self:loadImage(item.src)
+			local scale = self:scale(w, h)
 			table.insert(self.idata, {
-				type='image', height=h, width=w,
-				src=item.src, render=image,
+				type='image', height=h*scale, width=w*scale,
+				src=item.src, render=image, scale=scale,
 			})
 		else
 			local msg = '[WARNING: Unknown tag %q]'
@@ -184,6 +185,13 @@ function render.PageRenderer:__calcHeight()
 	for _, item in ipairs(self.idata) do
 		self.height = self.height + item.height
 	end
+end
+
+function render.PageRenderer:scale(width, height)
+	if width > self.textwidth then
+		return self.textwidth / width
+	end
+	return 1
 end
 
 function render.PageRenderer:loadImage(src)
@@ -270,11 +278,10 @@ function render.PageRenderer:drawContents(left, top, bottom)
 				)
 				table.insert(self.textures, item.render)
 			end
-			local scale = 1
-			if item.width > self.textwidth then
-				scale = self.textwidth / item.width
-			end
-			Graphics.drawScaleImage(left, y - top, item.render, scale, scale)
+			Graphics.drawScaleImage(
+				left, y - top, item.render,
+				item.scale, item.scale
+			)
 		end
 
 		::skip_drawing::
