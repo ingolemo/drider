@@ -11,6 +11,18 @@ function main.run()
 	end
 end
 
+function main.system(cont)
+	if System.checkStatus() == APP_EXITING then
+		System.exit()
+	end
+	if cont:key(KEY_START):down() then
+		System.exit()
+	end
+	if cont:key(KEY_HOME):down() then
+		System.showHomeMenu()
+	end
+end
+
 function main.choose(choices)
 	local cont = control.Controls:new()
 	local index = 0
@@ -18,10 +30,7 @@ function main.choose(choices)
 
 	while true do
 		cont:update()
-
-		if System.checkStatus() == APP_EXITING then System.exit() end
-		if cont:key(KEY_START):down() then System.exit() end
-		if cont:key(KEY_HOME):down() then System.showHomeMenu() end
+		main.system(cont)
 
 		if cont:key(KEY_A):down() and #choices ~= 0 then
 			break
@@ -61,13 +70,9 @@ function main.readEbook(bookfile)
 
 	while true do
 		cont:update()
+		main.system(cont)
 
-		if System.checkStatus() == APP_EXITING then System.exit() end
-		if cont:key(KEY_START):down() then System.exit() end
 		if cont:key(KEY_SELECT):down() then break end
-		if cont:key(KEY_HOME):down() then
-			System.showHomeMenu()
-		end
 
 		if cont:key(KEY_A):down() then
 			book:toggleBookmark()
