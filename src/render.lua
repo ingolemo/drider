@@ -241,11 +241,20 @@ function render.PageRenderer:drawBookmark()
 end
 
 function render.PageRenderer:drawScrollbar()
-	local sbTop = math.max(0, math.floor(self.position * 239/self.height))
-	local sbHeight = math.floor(480 * 239/self.height)
-	local sbBottom = math.min(329, sbTop + sbHeight)
-	if sbTop ~= 0 or sbBottom ~= 329 then
-		Graphics.fillRect(394, 399, sbTop, sbBottom, pencil)
+	local min_height = 6
+	local screen_ratio = 240 / self.height
+	local sbHeight = math.floor(480 * screen_ratio + 0.5)
+	local sbTop = self.position * screen_ratio
+
+	sbHeight = math.max(min_height, sbHeight)
+
+	local sbBottom = sbTop + sbHeight
+
+	sbTop = math.floor(math.max(0, math.min(240 - min_height, sbTop)))
+	sbBottom = math.ceil(math.max(min_height, math.min(240, sbBottom)))
+
+	if sbTop ~= 0 or sbBottom ~= 240 then
+		Graphics.fillRect(400 - min_height, 400, sbTop, sbBottom, pencil)
 	end
 end
 
