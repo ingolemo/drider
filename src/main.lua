@@ -76,6 +76,7 @@ function main.readEbook(bookfile)
 
 		if cont.a:pressed() then
 			book:toggleBookmark()
+			page.dirty = true
 		end
 
 		if cont.left:pressed() then

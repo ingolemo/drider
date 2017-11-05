@@ -31,7 +31,7 @@ function bookmark.set(bookFile, pageNum)
 	utils.writeFile(bmPath, unparseBookmarks(slate))
 end
 
-function bookmark.remove(bookfile)
+function bookmark.remove(bookFile)
 	slate[bookFile] = nil
 	utils.writeFile(bmPath, unparseBookmarks(slate))
 end
