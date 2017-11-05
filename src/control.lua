@@ -89,6 +89,43 @@ function control.Circle:check()
 	return self.x, self.y
 end
 
+-- CLASS: Touchpad
+control.Touchpad = {}
+control.Touchpad.__index = control.Touchpad
+function control.Touchpad:new()
+	local touch = {}
+	setmetatable(touch, control.Touchpad)
+	touch.count = 0
+	touch.x = 0
+	touch.y = 0
+	touch.prev_x = 0
+	touch.prev_y = 0
+	return touch
+end
+
+function control.Touchpad:update(touched)
+	if not touched then
+		self.count = 0
+		return
+	end
+	self.prev_x = self.x
+	self.prev_y = self.y
+	self.x, self.y = Controls.readTouch()
+	self.count = self.count + 1
+end
+
+function control.Touchpad:check()
+	if self.count >= 1 then
+		return self.x, self.y
+	end
+end
+
+function control.Touchpad:diff()
+	if self.count >= 2 then
+		return self.x - self.prev_x, self.y - self.prev_y
+	end
+end
+
 -- CLASS: Controls
 control.Controls = {}
 control.Controls.__index = control.Controls
@@ -110,10 +147,10 @@ function control.Controls:new()
 	for name, _ in pairs(self.buttons) do
 		cont[name] = control.Button:new()
 	end
-	cont.circle = control.Circle:new()
 
-	cont.ctx, cont.cty = Controls.readTouch()
-	cont.ptx, cont.pty = cont.ctx, cont.cty
+	cont.circle = control.Circle:new()
+	cont.touchpad = control.Touchpad:new()
+
 	return cont
 end
 
@@ -125,20 +162,7 @@ function control.Controls:update()
 	end
 
 	self.circle:update()
-
-	self.ptx, self.pty = self.ctx, self.cty
-	self.ctx, self.cty = Controls.readTouch()
-end
-
-function control.Controls:touch()
-	return self.ctx, self.cty
-end
-
-function control.Controls:touchDiff()
-	if self.ctx == 0 or self.cty == 0 or self.ptx == 0 or self.pty == 0 then
-		return nil
-	end
-	return self.ctx - self.ptx, self.cty - self.pty
+	self.touchpad:update(Controls.check(pad, KEY_TOUCH))
 end
 
 return control

@@ -100,7 +100,7 @@ function main.readEbook(bookfile)
 			page.velocity = page.velocity * (1/page.friction) + dy
 		end
 
-		local _, dy = cont:touchDiff()
+		local _, dy = cont.touchpad:diff()
 		if dy ~= nil then
 			page.velocity = -dy
 		end
