@@ -92,21 +92,25 @@ end
 -- CLASS: Controls
 control.Controls = {}
 control.Controls.__index = control.Controls
+control.Controls.buttons = {
+	left = KEY_DLEFT,
+	right = KEY_DRIGHT,
+	up = KEY_DUP,
+	down = KEY_DDOWN,
+	a = KEY_A,
+	start = KEY_START,
+	select = KEY_SELECT,
+	home = KEY_HOME,
+	power = KEY_POWER,
+}
 function control.Controls:new()
 	local cont = {}
 	setmetatable(cont, control.Controls)
-	local button_ids = {
-		KEY_A, KEY_B, KEY_R, KEY_L, KEY_START, KEY_SELECT,
-		KEY_X, KEY_Y, KEY_ZL, KEY_ZR,
-		KEY_DRIGHT, KEY_DLEFT, KEY_DUP, KEY_DDOWN,
-		KEY_TOUCH, KEY_HOME, KEY_POWER,
-	}
-	self.buttons = {}
-	for _, id in ipairs(button_ids) do
-		self.buttons[id] = control.Button:new(id)
-	end
 
-	self.circle = control.Circle:new()
+	for name, _ in pairs(self.buttons) do
+		cont[name] = control.Button:new()
+	end
+	cont.circle = control.Circle:new()
 
 	cont.ctx, cont.cty = Controls.readTouch()
 	cont.ptx, cont.pty = cont.ctx, cont.cty
@@ -115,19 +119,15 @@ end
 
 function control.Controls:update()
 	local pad = Controls.read()
-	for id, button in pairs(self.buttons) do
+	for name, id in pairs(self.buttons) do
 		local pressed = Controls.check(pad, id)
-		button:update(pressed)
+		self[name]:update(pressed)
 	end
 
 	self.circle:update()
 
 	self.ptx, self.pty = self.ctx, self.cty
 	self.ctx, self.cty = Controls.readTouch()
-end
-
-function control.Controls:key(key_id)
-	return self.buttons[key_id]
 end
 
 function control.Controls:touch()
