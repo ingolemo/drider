@@ -36,10 +36,10 @@ function main.choose(choices)
 			break
 		end
 
-		if cont:key(KEY_DUP):pressed() then
+		if cont:key(KEY_DUP):pressed() or cont.circle.up:pressed() then
 			index = (index - 1) % #choices
 			menu:select(index + 1)
-		elseif cont:key(KEY_DDOWN):pressed() then
+		elseif cont:key(KEY_DDOWN):pressed() or cont.circle.down:pressed() then
 			index = (index + 1) % #choices
 			menu:select(index + 1)
 		end
@@ -94,13 +94,10 @@ function main.readEbook(bookfile)
 			page:scroll(5)
 		end
 
-		local _, dy = cont:circle()
-		if dy ~= nil and math.abs(dy) > 30 then
+		local _, dy = cont.circle:check()
+		if dy ~= 0 then
 			-- undo friction
-			page.velocity = page.velocity * (1/page.friction)
-
-			local sign, value = utils.sign_abs(dy)
-			page.velocity = page.velocity + (-1) * sign * ((value - 30) / 100.0)
+			page.velocity = page.velocity * (1/page.friction) + dy
 		end
 
 		local _, dy = cont:touchDiff()

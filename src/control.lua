@@ -36,6 +36,59 @@ function control.Button:check()
 	return self.count ~= 0
 end
 
+-- CLASS: Circle
+control.Circle = {}
+control.Circle.__index = control.Circle
+control.Circle.deadzone = 30
+control.Circle.max = 150
+function control.Circle:new(id)
+	local circ = {}
+	setmetatable(circ, control.Circle)
+
+	circ.x = 0
+	circ.y = 0
+
+	circ.left = control.Button:new()
+	circ.right = control.Button:new()
+	circ.up = control.Button:new()
+	circ.down = control.Button:new()
+
+	return circ
+end
+
+function control.Circle:update()
+	local x, y = Controls.readCirclePad()
+
+	-- neg is down and pos is up for some reason
+	y = -y
+
+	self.x = self:normalise(x)
+	self.y = self:normalise(y)
+
+	self.left:update(self.x < 0)
+	self.right:update(self.x > 0)
+	self.up:update(self.y < 0)
+	self.down:update(self.y > 0)
+end
+
+function control.Circle:normalise(value)
+	if value < -self.max then
+		return -1
+	elseif value > self.max then
+		return 1
+	elseif value < -self.deadzone then
+		return (value + self.deadzone) / (self.max - self.deadzone)
+	elseif value > self.deadzone then
+		return (value - self.deadzone) / (self.max - self.deadzone)
+	else
+		return 0
+	end
+end
+
+function control.Circle:check()
+	return self.x, self.y
+end
+
 -- CLASS: Controls
 control.Controls = {}
 control.Controls.__index = control.Controls
@@ -53,6 +106,8 @@ function control.Controls:new()
 		self.buttons[id] = control.Button:new(id)
 	end
 
+	self.circle = control.Circle:new()
+
 	cont.ctx, cont.cty = Controls.readTouch()
 	cont.ptx, cont.pty = cont.ctx, cont.cty
 	return cont
@@ -65,16 +120,14 @@ function control.Controls:update()
 		button:update(pressed)
 	end
 
+	self.circle:update()
+
 	self.ptx, self.pty = self.ctx, self.cty
 	self.ctx, self.cty = Controls.readTouch()
 end
 
 function control.Controls:key(key_id)
 	return self.buttons[key_id]
-end
-
-function control.Controls:circle()
-	return Controls.readCirclePad()
 end
 
 function control.Controls:touch()
