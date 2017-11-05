@@ -9,31 +9,31 @@ function control.Button:new(id)
 	local button = {}
 	setmetatable(button, control.Button)
 	button.id = id
-	button.pressed = 0
+	button.count = 0
 	return button
 end
 
 function control.Button:update(pressed_down)
 	if pressed_down then
-		self.pressed = self.pressed + 1
+		self.count = self.count + 1
 	else
-		self.pressed = 0
+		self.count = 0
 	end
 end
 
-function control.Button:down()
-	if self.pressed == 0 then
+function control.Button:pressed()
+	if self.count == 0 then
 		return false
-	elseif self.pressed == 1 then
+	elseif self.count == 1 then
 		return true
-	elseif self.pressed < self.repeat_delay then
+	elseif self.count < self.repeat_delay then
 		return false
 	end
-	return ((self.pressed - self.repeat_delay - 1) % self.repeat_rate) == 0
+	return ((self.count - self.repeat_delay - 1) % self.repeat_rate) == 0
 end
 
 function control.Button:check()
-	return self.pressed ~= 0
+	return self.count ~= 0
 end
 
 -- CLASS: Controls

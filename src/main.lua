@@ -15,10 +15,10 @@ function main.system(cont)
 	if System.checkStatus() == APP_EXITING then
 		System.exit()
 	end
-	if cont:key(KEY_START):down() then
+	if cont:key(KEY_START):pressed() then
 		System.exit()
 	end
-	if cont:key(KEY_HOME):down() then
+	if cont:key(KEY_HOME):pressed() then
 		System.showHomeMenu()
 	end
 end
@@ -32,14 +32,14 @@ function main.choose(choices)
 		cont:update()
 		main.system(cont)
 
-		if cont:key(KEY_A):down() and #choices ~= 0 then
+		if cont:key(KEY_A):pressed() and #choices ~= 0 then
 			break
 		end
 
-		if cont:key(KEY_DUP):down() then
+		if cont:key(KEY_DUP):pressed() then
 			index = (index - 1) % #choices
 			menu:select(index + 1)
-		elseif cont:key(KEY_DDOWN):down() then
+		elseif cont:key(KEY_DDOWN):pressed() then
 			index = (index + 1) % #choices
 			menu:select(index + 1)
 		end
@@ -72,17 +72,17 @@ function main.readEbook(bookfile)
 		cont:update()
 		main.system(cont)
 
-		if cont:key(KEY_SELECT):down() then break end
+		if cont:key(KEY_SELECT):pressed() then break end
 
-		if cont:key(KEY_A):down() then
+		if cont:key(KEY_A):pressed() then
 			book:toggleBookmark()
 		end
 
-		if cont:key(KEY_DLEFT):down() then
+		if cont:key(KEY_DLEFT):pressed() then
 			book:flipBackward()
 			page:free()
 			page = render.PageRenderer:new(book)
-		elseif cont:key(KEY_DRIGHT):down() then
+		elseif cont:key(KEY_DRIGHT):pressed() then
 			book:flipForward()
 			page:free()
 			page = render.PageRenderer:new(book)
