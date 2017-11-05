@@ -214,13 +214,15 @@ function render.PageRenderer:scroll(amount)
 	self.position = self.position + amount
 	self.dirty = true
 
-	if self.position > self.height - 480 then
-		self.position = self.height - 480
+	local max_pos = math.max(self.height - 480, 0)
+	if self.position > max_pos then
+		self.position = max_pos
 		self.velocity = 0
 	end
 
-	if self.position < 0 then
-		self.position = 0
+	local min_pos = math.min(-240, self.height - 480)
+	if self.position < min_pos then
+		self.position = min_pos
 		self.velocity = 0
 	end
 end
