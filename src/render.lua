@@ -234,6 +234,31 @@ function render.PageRenderer:update()
 	self.velocity = self.velocity * self.friction
 end
 
+function render.PageRenderer:getImage(tap_x, tap_y)
+	local top = self.position + 240
+	local bottom = self.position + 480
+
+	local y = 0
+	for _, item in ipairs(self.idata) do
+		if y + item.height < top then
+			goto skip_item
+		elseif bottom < y then
+			break
+		end
+
+		if item.type == 'image' then
+			local x_hit = margin < tap_x and tap_x < margin + item.width
+			local y_hit = y - top < tap_y and tap_y < y - top + item.height
+			if x_hit and y_hit then
+				return item.render
+			end
+		end
+
+		::skip_item::
+		y = y + item.height
+	end
+end
+
 function render.PageRenderer:drawBookmark()
 	if self.book:isCurrentBookmarked() then
 		local x, h = 370, 25
@@ -317,6 +342,72 @@ function render.PageRenderer:draw()
 	Graphics.initBlend(BOTTOM_SCREEN)
 	Graphics.fillRect(0, 320, 0, 240, paper)
 	self:drawContents(margin, self.position + 240, self.position + 480)
+	Graphics.termBlend()
+
+	Graphics.flip()
+
+	self.dirty = false
+end
+
+-- CLASS: ImageRendeder
+render.ImageRenderer = {}
+render.ImageRenderer.__index = render.ImageRenderer
+render.ImageRenderer.zoom_amount = 1.05
+function render.ImageRenderer:new(image)
+	local obj = {}
+	setmetatable(obj, render.ImageRenderer)
+	obj.image = image
+	obj.width = Graphics.getImageWidth(image)
+	obj.height = Graphics.getImageHeight(image)
+	obj.x = obj.width/2
+	obj.y = obj.height/2
+	obj.min_scale = math.min(320/obj.width, 240/obj.height)
+	obj.max_scale = 5
+	obj.scale = obj.min_scale
+	obj.dirty = true
+	return obj
+end
+
+function render.ImageRenderer:scroll(x, y)
+	self.x = self.x + x / self.scale
+	self.y = self.y + y / self.scale
+
+	self.x = math.max(0, math.min(self.x, self.width))
+	self.y = math.max(0, math.min(self.y, self.height))
+
+	self.dirty = true
+end
+
+function render.ImageRenderer:zoomIn()
+	self.scale = self.scale * self.zoom_amount
+	self.scale = math.max(self.min_scale, math.min(self.scale, self.max_scale))
+	self.dirty = true
+end
+
+function render.ImageRenderer:zoomOut()
+	self.scale = self.scale / self.zoom_amount
+	self.scale = math.max(self.min_scale, math.min(self.scale, self.max_scale))
+	self.dirty = true
+end
+
+function render.ImageRenderer:update()
+end
+
+function render.ImageRenderer:draw()
+	Screen.waitVblankStart()
+	if not self.dirty then
+		return
+	end
+
+	local s = self.scale
+	local x = self.x * s
+	local y = self.y * s
+	Graphics.initBlend(TOP_SCREEN)
+	Graphics.drawScaleImage(200 - x, 360 - y, self.image, s, s)
+	Graphics.termBlend()
+
+	Graphics.initBlend(BOTTOM_SCREEN)
+	Graphics.drawScaleImage(160 - x, 120 - y, self.image, s, s)
 	Graphics.termBlend()
 
 	Graphics.flip()

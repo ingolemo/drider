@@ -9,8 +9,6 @@ in Lua using Rinnegatamante's [Lua Player Plus 3ds].
 
 Drider has a few limitations:
 
-* It does not support images. They will be rendered as grey boxes so at
-  least you know there was supposed to be an image there.
 * It does not support css or any kind of inline styling, such as &lt;b&gt;
   or &lt;i&gt; tags.
 * It doesn't handle non-ascii text well. If you're reading a utf-8
@@ -42,8 +40,17 @@ Reading:
 * A button to bookmark a page. Press A again on the same page to
   unbookmark it. If an ebook has a page bookmarked then drider will jump
   to that page when you load the ebook.
+* Tap an image on the touchscreen to view it more closely.
 * Start button to exit.
 * Select button to go back to the book selection.
+* Home button to return to the Home menu (cia-only).
+
+Image viewing:
+
+* Circle-pad will pan across the image.
+* Up and Down on the d-pad will zoom in and out respectively.
+* B button to return to the page you were reading.
+* Start button to exit.
 * Home button to return to the Home menu (cia-only).
 
 

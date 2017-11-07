@@ -148,6 +148,7 @@ control.Controls.buttons = {
 	up = KEY_DUP,
 	down = KEY_DDOWN,
 	a = KEY_A,
+	b = KEY_B,
 	start = KEY_START,
 	select = KEY_SELECT,
 	home = KEY_HOME,

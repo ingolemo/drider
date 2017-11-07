@@ -106,11 +106,51 @@ function main.readEbook(bookfile)
 			page.velocity = -dy
 		end
 
+		local x, y = cont.touchpad:tapped()
+		if x ~= nil and y ~= nil then
+			local img = page:getImage(x, y)
+			if img ~= nil then
+				main.viewImage(img, cont)
+			end
+		end
+
 		page:update()
 		page:draw()
 	end
 
 	page:free()
+end
+
+function main.viewImage(image, cont)
+	local img = render.ImageRenderer:new(image)
+
+	while true do
+		cont:update()
+		main.system(cont)
+
+		if cont.b:pressed() then
+			break
+		end
+
+		if cont.up:check() then
+			img:zoomIn()
+		elseif cont.down:check() then
+			img:zoomOut()
+		end
+
+		local dx, dy = cont.circle:check()
+		if dx ~= 0 or dy ~= 0 then
+			img:scroll(dx * 10, dy * 10)
+		end
+
+		local dx, dy = cont.touchpad:diff()
+		if dx ~= nil and dy ~= nil then
+			img:scroll(-dx, -dy)
+		end
+
+		img:update()
+		img:draw()
+	end
 end
 
 return main
