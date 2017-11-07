@@ -9,7 +9,7 @@ end
 function pathlib.normalise(path)
 	-- normalises a path, removing .. components:
 	-- /3ds/drider/../meh -> /3ds/meh
-	return path:gsub('//', '/'):gsub('([^/]+/%.%.)', '')
+	return path:gsub('//', '/'):gsub('([^/]+/%.%.)', ''):gsub('//', '/')
 end
 
 function pathlib.join(head, tail)
