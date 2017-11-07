@@ -92,10 +92,12 @@ end
 -- CLASS: Touchpad
 control.Touchpad = {}
 control.Touchpad.__index = control.Touchpad
+control.Touchpad.tap_limit = 5
 function control.Touchpad:new()
 	local touch = {}
 	setmetatable(touch, control.Touchpad)
 	touch.count = 0
+	touch.prev_count = 0
 	touch.x = 0
 	touch.y = 0
 	touch.prev_x = 0
@@ -105,6 +107,7 @@ end
 
 function control.Touchpad:update(touched)
 	if not touched then
+		self.prev_count = self.count
 		self.count = 0
 		return
 	end
@@ -123,6 +126,16 @@ end
 function control.Touchpad:diff()
 	if self.count >= 2 then
 		return self.x - self.prev_x, self.y - self.prev_y
+	end
+end
+
+function control.Touchpad:tapped()
+	if self.count > 0 then
+		return
+	elseif self.prev_count == 0 then
+		return
+	elseif self.prev_count <= self.tap_limit then
+		return self.x, self.y
 	end
 end
 
