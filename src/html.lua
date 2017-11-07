@@ -73,7 +73,9 @@ function html.parse(contents)
 		if empty == '/' then
 			if label == 'img' then
 				writeItem()
-				table.insert(result, {type='img', src=parsedAttrs.src})
+				table.insert(result, {
+					type='img', src=parsedAttrs.src, alt=parsedAttrs.alt,
+				})
 			end
 		elseif isClosing == '' then
 			local maybeType = tagMap[label]

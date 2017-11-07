@@ -168,11 +168,12 @@ function render.PageRenderer:__compile()
 				insertText(line, regularFont, self.psize)
 			end
 		elseif item.type == 'img' then
-			local image, w, h = self:loadImage(item.src)
+			local image, w, h = self:loadImage(item)
 			local scale = self:scale(w, h)
 			table.insert(self.idata, {
 				type='image', height=h*scale, width=w*scale,
-				src=item.src, render=image, scale=scale,
+				src=item.src, alt=item.alt,
+				render=image, scale=scale,
 			})
 		else
 			local msg = '[WARNING: Unknown tag %q]'
@@ -198,15 +199,25 @@ function render.PageRenderer:scale(width, height)
 	return 1
 end
 
-function render.PageRenderer:loadImage(src)
-	local ext = src:match('%.%w+$')
-	-- ext = '' -- disable all image loading
-	if ext ~= '.jpg' and ext ~= '.bmp' and ext ~= '.png' then
-		return nil, self.textwidth, 80
+function render.PageRenderer:loadImage(item)
+	local ext = item.src:match('%.%w+$')
+
+	local bad_ext = true
+	if ext = '.jpg' or ext = '.bmp' or ext = '.png' then
+		bad_ext = false
 	end
 
-	local filename = self.book:imageFile(src)
-	local image = Graphics.loadImage(filename)
+	local image
+	if bad_ext or not self.showImages then
+		image = renderText(
+			string.format('Image: "%s"\n%s', item.alt, item.src),
+			italicFont, 20, pencil, self.textwidth
+		)
+	else
+		local filename = self.book:imageFile(item.src)
+		image = Graphics.loadImage(filename)
+	end
+
 	table.insert(self.textures, image)
 	local w = Graphics.getImageWidth(image)
 	local h = Graphics.getImageHeight(image)
@@ -316,13 +327,6 @@ function render.PageRenderer:drawContents(left, top, bottom)
 			end
 			Graphics.drawImage(left, y - top, item.render, paper)
 		elseif item.type == 'image' then
-			if item.render == nil then
-				item.render = renderText(
-					string.format('(Image: %s)', item.content),
-					italicFont, 20, pencil, self.textwidth
-				)
-				table.insert(self.textures, item.render)
-			end
 			Graphics.drawScaleImage(
 				left, y - top, item.render,
 				item.scale, item.scale
