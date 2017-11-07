@@ -17,6 +17,9 @@ Drider has a few limitations:
   mojibake is common.
 * Text rendering on the 3ds is not very good so you will see plenty of
   bad kerning.
+* Drider can crash with books that contain large images. If the images
+  are not important then consider disabling them (x button at the book
+  select screen).
 
 Despite these issues, Drider can actually be used to read things! It
 works best on text-heavy, low-formatting books such as novels.
@@ -29,6 +32,7 @@ Selecting:
 
 * Up and Down on the d-pad or circle-pad to choose a book to read.
 * A button to select the book.
+* X button to toggle loading of images.
 * Start button to exit.
 * Home button to return to the Home menu (cia-only).
 

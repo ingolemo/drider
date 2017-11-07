@@ -44,8 +44,14 @@ function render.MenuRenderer:new(choices)
 	obj.position = -10
 	obj.images = {}
 	obj.choices = {}
+
 	obj.banner = Graphics.loadImage(pathlib.nearby('banner.png'))
 	table.insert(obj.images, obj.banner)
+
+	obj.imgDisTex = renderText(
+		'Images Disabled', italicFont, self.size, ink, paper)
+	table.insert(obj.images, obj.imgDisTex)
+
 	for _, choice in ipairs(choices) do
 		local tex = renderText(choice, regularFont, self.size, ink, paper)
 		table.insert(obj.choices, tex)
@@ -80,6 +86,12 @@ function render.MenuRenderer:drawChoices()
 	end
 end
 
+function render.MenuRenderer:drawImagesDisabled()
+	local width = Graphics.getImageWidth(self.imgDisTex)
+	local height = Graphics.getImageHeight(self.imgDisTex)
+	Graphics.drawImage(400 - width, 240 - height, self.imgDisTex, paper)
+end
+
 function render.MenuRenderer:update()
 	if math.abs(self.position - self.selected) > 0.1 then
 		self.position = utils.lerp(self.position, self.selected, 0.1)
@@ -87,7 +99,7 @@ function render.MenuRenderer:update()
 	end
 end
 
-function render.MenuRenderer:draw()
+function render.MenuRenderer:draw(showImages)
 	Screen.waitVblankStart()
 	if not self.dirty then
 		return
@@ -96,6 +108,9 @@ function render.MenuRenderer:draw()
 	Graphics.initBlend(TOP_SCREEN)
 	Graphics.fillRect(0, 400, 0, 240, paper)
 	Graphics.drawImage(75, 32, self.banner)
+	if not showImages then
+		self:drawImagesDisabled()
+	end
 	Graphics.termBlend()
 
 	Graphics.initBlend(BOTTOM_SCREEN)
@@ -118,10 +133,11 @@ render.PageRenderer.h3size = 24
 render.PageRenderer.psize = 16
 render.PageRenderer.textwidth = 320 - margin*2
 render.PageRenderer.friction = 0.95
-function render.PageRenderer:new(book)
+function render.PageRenderer:new(book, showImages)
 	local obj = {}
 	setmetatable(obj, render.PageRenderer)
 	obj.book = book
+	obj.showImages = showImages
 	obj.textures = {}
 	obj.offset = -500
 	obj.position = 0
@@ -203,7 +219,7 @@ function render.PageRenderer:loadImage(item)
 	local ext = item.src:match('%.%w+$')
 
 	local bad_ext = true
-	if ext = '.jpg' or ext = '.bmp' or ext = '.png' then
+	if ext == '.jpg' or ext == '.bmp' or ext == '.png' then
 		bad_ext = false
 	end
 

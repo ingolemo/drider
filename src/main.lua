@@ -6,8 +6,8 @@ local main = {}
 
 function main.run()
 	while true do
-		local bookfile = main.chooseEbook()
-		main.readEbook(bookfile)
+		local bookfile, showImages = main.chooseEbook()
+		main.readEbook(bookfile, showImages)
 	end
 end
 
@@ -27,6 +27,7 @@ function main.choose(choices)
 	local cont = control.Controls:new()
 	local index = 0
 	local menu = render.MenuRenderer:new(choices)
+	local showImages = true
 
 	while true do
 		cont:update()
@@ -34,6 +35,11 @@ function main.choose(choices)
 
 		if cont.a:pressed() and #choices ~= 0 then
 			break
+		end
+
+		if cont.x:pressed() then
+			showImages = not showImages
+			menu.dirty = true
 		end
 
 		if cont.up:pressed() or cont.circle.up:pressed() then
@@ -45,11 +51,11 @@ function main.choose(choices)
 		end
 
 		menu:update()
-		menu:draw()
+		menu:draw(showImages)
 	end
 
 	menu:free()
-	return choices[index + 1]
+	return choices[index + 1], showImages
 end
 
 function main.chooseEbook()
@@ -60,13 +66,14 @@ function main.chooseEbook()
 		end
 	end
 
-	return '/books/' .. main.choose(books)
+	local book, showImages = main.choose(books)
+	return '/books/' .. book, showImages
 end
 
-function main.readEbook(bookfile)
+function main.readEbook(bookfile, showImages)
 	local cont = control.Controls:new()
 	local book = epub.load(bookfile)
-	local page = render.PageRenderer:new(book)
+	local page = render.PageRenderer:new(book, showImages)
 
 	while true do
 		cont:update()
