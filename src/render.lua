@@ -120,6 +120,7 @@ function render.PageRenderer:new(book)
 	setmetatable(obj, render.PageRenderer)
 	obj.book = book
 	obj.textures = {}
+	obj.offset = -500
 	obj.position = 0
 	obj.velocity = 0
 	obj.dirty = true
@@ -228,6 +229,11 @@ function render.PageRenderer:scroll(amount)
 end
 
 function render.PageRenderer:update()
+	if self.offset < 0.1 then
+		self.offset = utils.lerp(self.offset, 0, 0.1)
+		self.dirty = true
+	end
+
 	if math.abs(self.velocity) > 0.1 then
 		self:scroll(self.velocity)
 	end
@@ -336,12 +342,18 @@ function render.PageRenderer:draw()
 	self:drawBookmark()
 	self:drawScrollbar()
 	self:drawPageNum()
-	self:drawContents(40 + margin, self.position, self.position + 240)
+	self:drawContents(
+		40 + margin,
+		self.position + self.offset,
+		self.position + self.offset + 240)
 	Graphics.termBlend()
 
 	Graphics.initBlend(BOTTOM_SCREEN)
 	Graphics.fillRect(0, 320, 0, 240, paper)
-	self:drawContents(margin, self.position + 240, self.position + 480)
+	self:drawContents(
+		margin,
+		self.position + self.offset + 240,
+		self.position + self.offset + 480)
 	Graphics.termBlend()
 
 	Graphics.flip()
