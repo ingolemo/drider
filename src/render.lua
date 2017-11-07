@@ -36,24 +36,27 @@ end
 render.MenuRenderer = {}
 render.MenuRenderer.__index = render.MenuRenderer
 render.MenuRenderer.size = 20
-render.MenuRenderer.banner = Graphics.loadImage(pathlib.nearby('banner.png'))
 function render.MenuRenderer:new(choices)
 	local obj = {}
 	setmetatable(obj, render.MenuRenderer)
 	obj.dirty = true
 	obj.selected = 1
 	obj.position = -10
+	obj.images = {}
 	obj.choices = {}
+	obj.banner = Graphics.loadImage(pathlib.nearby('banner.png'))
+	table.insert(obj.images, obj.banner)
 	for _, choice in ipairs(choices) do
 		local tex = renderText(choice, regularFont, self.size, ink, paper)
 		table.insert(obj.choices, tex)
+		table.insert(obj.images, tex)
 	end
 	return obj
 end
 
 function render.MenuRenderer:free()
-	for _, choice in ipairs(self.choices) do
-		Graphics.freeImage(choice)
+	for _, image in ipairs(self.images) do
+		Graphics.freeImage(image)
 	end
 end
 
