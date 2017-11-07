@@ -59,13 +59,17 @@ function epub.load(file)
 	function book:flipBackward()
 		if self.pagenum > 1 then
 			self.pagenum = self.pagenum - 1
+			return true
 		end
+		return false
 	end
 
 	function book:flipForward()
 		if self.pagenum < self:length() then
 			self.pagenum = self.pagenum + 1
+			return true
 		end
+		return false
 	end
 
 	function book:toggleBookmark()
