@@ -27,7 +27,7 @@ Put your ebooks in a folder called `books` at the root of your sd card.
 
 Selecting:
 
-* Up and Down on the d-dpad to choose a book to read
+* Up and Down on the d-pad or circle-pad to choose a book to read.
 * A button to select the book.
 * Start button to exit.
 * Home button to return to the Home menu (cia-only).
@@ -39,7 +39,8 @@ Reading:
 * Left and Right on the d-pad to switch pages.
 * A button to bookmark a page. Press A again on the same page to
   unbookmark it. If an ebook has a page bookmarked then drider will jump
-  to that page when you load the ebook.
+  to that page when you load the ebook. Only one page can be bookmarked
+  at a time per ebook.
 * Tap an image on the touchscreen to view it more closely.
 * Start button to exit.
 * Select button to go back to the book selection.
