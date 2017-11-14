@@ -89,12 +89,12 @@ function main.readEbook(bookfile, showImages)
 		if cont.left:pressed() then
 			if book:flipBackward() then
 				page:free()
-				page = render.PageRenderer:new(book)
+				page = render.PageRenderer:new(book, showImages)
 			end
 		elseif cont.right:pressed() then
 			if book:flipForward() then
 				page:free()
-				page = render.PageRenderer:new(book)
+				page = render.PageRenderer:new(book, showImages)
 			end
 		end
 
